@@ -859,7 +859,7 @@ const CONFIG = {
   endereco: "",                               // rodapé — deixe vazio para ocultar
   telefone: "",                               // rodapé — deixe vazio para ocultar
   seiPessoal: "Seção de Pessoal do 7º GB",    // unidade que recebe o processo após a chefia
-  versao: "1.11",
+  versao: "1.17",
   atualizadoEm: "outubro de 2026",
   elaboracao: ""                              // ex.: "Seção de Pessoal do 7º GB" (vazio = oculto)
 };
@@ -970,6 +970,29 @@ const PORTARIA_189 = "Portaria CG nº 189/2021 (publicada no BGE nº 150/2021)";
 const AMPARO_ARMAS = "na Lei Federal nº 10.826/2003, na Portaria nº 167-COLOG/C Ex/2024 e na Portaria do Comando Geral nº 189/2021";
 const ASSINATURA = "assinatura digital (gov.br ou ICP-Brasil)";
 
+/* Licença Especial e LTIP: impedimentos da Portaria CG nº 003/11-DCP/DGP (SUNOR nº 003/2011), art. 6º */
+const QUADRO_IMPEDIMENTOS_LE_LTIP = {
+  titulo: "Quem não recebe LE nem LTIP (SUNOR nº 003/2011, art. 6º)",
+  cab: ["Alínea", "Situação do militar"],
+  linhas: [
+    ["a", "Nomeado para compor Conselho Especial ou Permanente da JME"],
+    ["b", "Na condição de desertor, ter se apresentado voluntariamente ou ter sido capturado e reincluído a fim de se ver processar"],
+    ["c", "Recentemente movimentado, antes de decorridos 3 meses da apresentação na OME de destino"],
+    ["d", "Relacionado para matrícula, aguardando matrícula ou matriculado em curso ou estágio"],
+    ["e", "Agregado"],
+    ["f", "Submetido a Conselho de Disciplina, Conselho de Justificação ou Processo de Licenciamento"],
+    ["g", "Afastado das funções por Portaria do Secretário de Defesa Social, nos termos do art. 14 da Lei nº 11.929/2000"],
+    ["h", "Indiciado em inquérito policial, na esfera comum ou militar"],
+    ["i", "Denunciado ou processado criminalmente na Justiça Comum ou Militar"],
+    ["j", "Preso por força de flagrante delito, prisão preventiva ou prisão provisória"],
+    ["l", "Condenado por sentença criminal, mesmo que ainda não transitada em julgado"],
+    ["m", "Condenado à perda da função pública"],
+    ["n", "Beneficiado com a suspensão condicional da pena (sursis), a suspensão condicional do processo ou o livramento condicional"],
+    ["o", "Cumprindo pena judicial em qualquer regime ou em gozo do benefício de livramento condicional"]
+  ],
+  nota: "Além das situações estabelecidas em lei. Em caráter excepcional, o militar nessas situações pode entrar em gozo de LE ou LTIP, a critério do Comandante-Geral, depois de pronunciamento da DGP (art. 6º, parágrafo único)."
+};
+
 /* =========================================================================
    DESTINATÁRIOS DO REQUERIMENTO
    O requerimento é dirigido à autoridade que decide o assunto. O modelo do
@@ -978,7 +1001,7 @@ const ASSINATURA = "assinatura digital (gov.br ou ICP-Brasil)";
    ========================================================================= */
 const DEST = {
   cmt: { linha: "ILMO SR. COMANDANTE DO " + CONFIG.unidadeNome.toUpperCase(), nome: "Comandante do " + CONFIG.unidadeSigla },
-  dgp: { linha: CONFIG.destinatario, nome: "Diretor de Gestão de Pessoas" },
+  dgp: { linha: CONFIG.destinatario, nome: "Diretor de Gestão de Pessoal" },
   cg: { linha: "EXMO SR. COMANDANTE GERAL DO CBMPE", nome: "Comandante-Geral do CBMPE" },
   sds: { linha: "EXMO SR. SECRETÁRIO DE DEFESA SOCIAL", nome: "Secretário de Defesa Social" }
 };
@@ -1024,6 +1047,7 @@ const FORMULARIOS = {
                    trechos entre [[ ]] somem se o campo estiver vazio
      extra ....... frase complementar do Especificar (opcional)
      amparo ...... item 3, já com a preposição ("no art. ...", "na Lei ...")
+     rotuloEndereco  rótulo do campo Endereço do item 1 neste guia (padrão: "Endereço")
      marcar ...... opções com X (lista ou função); padrão: [opcao]
      avisos ...... função (pedido, utilidades, seus dados) que devolve avisos
      proprio ..... requerimento de modelo próprio, fora do quadro OBJETO:
@@ -1062,11 +1086,15 @@ const GUIAS = [
     atencao: [
       "O pedido deve ser protocolado com pelo menos 60 dias de antecedência do início das férias (Portaria CG nº 312/2025, art. 11, II, a).",
       "Informe sempre o novo período: interromper as férias e deixar o restante “para gozo oportuno” não é permitido (art. 11, § 5º).",
-      "Se você estiver afastado do serviço no primeiro dia de férias previsto, a reprogramação é obrigatória (art. 11, I, b).",
+      "Se você estiver afastado do serviço no primeiro dia de férias previsto — em licença para tratamento de saúde, luto, licença-maternidade ou paternidade, núpcias, Licença Especial, instalação ou trânsito —, a reprogramação é obrigatória (art. 11, I, b; cartilha da DGP sobre férias).",
+      "Se a reprogramação não for publicada pela OME e registrada nos seus assentamentos de ofício, requeira formalmente a regularização à sua OME (art. 11, §§ 1º e 2º).",
+      "Reprogramação com menos de 60 dias de antecedência e folha de pagamento já fechada: o abono de férias pode ser pago no mês seguinte ao gozo (art. 7º, parágrafo único).",
+      "Em gozo de férias, você fica impedido de participar do PJES/Diárias; nas férias fracionadas, pode participar no período em que estiver em atividade, desde que a situação esteja registrada no SGP/SAD (cartilha da DGP sobre férias).",
+      "Depois da licença-maternidade ou paternidade, há prioridade para gozar as férias pendentes a partir do dia seguinte ao fim da licença, em sequência (Portaria CG nº 310/2025, art. 2º, IV e § 2º).",
       "Cada OME tem até 10% do efetivo de férias por mês (arts. 5º e 14, § 2º): a nova data depende dessa vaga.",
       "A chefia imediata se manifesta sobre o pedido no próprio processo antes do envio à Seção de Pessoal."
     ],
-    base: ["Lei estadual nº 6.783/1974 (Estatuto), art. 61", "Portaria do Comando Geral nº 312/2025 (BGE nº 252/2025), arts. 2º, 11, 13 e 14"],
+    base: ["Lei estadual nº 6.783/1974 (Estatuto), art. 61", "Portaria do Comando Geral nº 312/2025 (BGE nº 252/2025), arts. 2º, 7º, 11, 13 e 14", "Portaria do Comando Geral nº 310/2025, art. 2º, IV e § 2º (férias depois da licença-maternidade ou paternidade)", "Cartilha informativa da DGP — Férias (atualizada conforme a Portaria CG nº 312/2025)"],
     relacionados: [],
     minuta: {
       campos: [
@@ -1192,17 +1220,17 @@ const GUIAS = [
     categoria: "afastamentos",
     icone: "mudanca",
     opcao: "23",
-    resumo: "Até 30 dias para o deslocamento quando a movimentação publicada implica mudança de município.",
-    tags: ["transito", "deslocamento", "movimentacao", "mudanca de municipio", "transferencia", "transferido", "viagem"],
-    quando: "Quando você é movimentado(a) para OME situada em outro município.",
-    decide: "Comandante do 7º GB (OME de origem)",
+    resumo: "De 2 a 8 dias de afastamento total do serviço, de acordo com as lotações de origem e de destino, para os preparativos da mudança, quando a movimentação implica deixar a unidade em que você serve.",
+    tags: ["transito", "deslocamento", "movimentacao", "mudanca de municipio", "guarnicao", "instalacao", "transferencia", "transferido", "viagem"],
+    quando: "Quando você é movimentado(a) e tem de deixar, em caráter definitivo, a unidade em que serve.",
+    decide: "Comandante do 7º GB, como OME cedente (de origem)",
     destinatario: DEST.cmt,
-    decideBase: "Decreto nº 7.510/1981 (Regulamento de Movimentação), art. 15",
-    aConfirmar: true,
-    prazo: "Até 30 dias",
+    decideBase: "Determinação à OME cedente para conceder o trânsito, conforme o art. 15 do Decreto nº 7.510/1981, de acordo com as lotações (quadro do guia)",
+    prazo: "De 2 a 8 dias, de acordo com as lotações (quadro abaixo), contados do desligamento da OME de origem",
     passos: [
-      { t: "Confirme a mudança de município", d: "O trânsito pressupõe movimentação publicada em BGE com mudança de município." },
-      { t: "Alinhe a apresentação", d: "Combine com a OME de destino a data de apresentação ao fim do trânsito." },
+      { t: "Confirme a mudança de unidade", d: "O trânsito é o período de afastamento total do serviço para os preparativos da mudança (Decreto nº 7.510/1981, art. 9º). Ele é concedido quando a movimentação obriga você a deixar, em caráter definitivo, a unidade em que serve; os dias dependem das lotações de origem e de destino (quadro abaixo)." },
+      { t: "Conte o prazo", d: "Os dias do quadro são contados do desligamento da OME de origem; o tempo de viagem não entra na conta (art. 15, caput e § 1º). O desligamento ocorre em até 10 dias da movimentação e, havendo passagem de cargo e encargos, o trânsito começa no dia seguinte ao fim desses prazos (arts. 32 e 38)." },
+      { t: "Alinhe a apresentação", d: "Combine com a OME de destino a data de apresentação ao fim do trânsito. A apresentação é o comparecimento presencial à OME de destino indicada no Suplemento de Pessoal, nos prazos do Decreto nº 7.510/1981; se algo impedir a apresentação, o fato deve ser informado à DGP (Portaria CG nº 303/2025, art. 8º, §§ 1º e 2º)." },
       P.abrir(),
       P.opcao("23", "o BGE da movimentação, as OMEs de origem e de destino e o período pretendido."),
       P.preencher(),
@@ -1210,24 +1238,43 @@ const GUIAS = [
       P.enviar(),
       P.acompanhar()
     ],
-    docs: [REQ("23"), "Cópia do RG Militar", "Nota de movimentação com mudança de município publicada em BGE"],
-    atencao: ["Sem mudança de município, não há trânsito.", "Para o transporte da mudança, o modelo tem opções próprias: 38 (Traslado de bagagem) e 03 (Ajuda de Custo) — confirme o cabimento com a Seção de Pessoal."],
-    base: ["Lei estadual nº 6.783/1974 (Estatuto), art. 62, IV"],
+    docs: [REQ("23"), "Cópia do RG Militar", "Nota de movimentação publicada em BGE, com mudança de unidade"],
+    quadros: [{
+      titulo: "Dias de trânsito, de acordo com as lotações",
+      cab: ["Inciso", "Movimentação", "Dias"],
+      linhas: [
+        ["I", "Da DInter/2 para a RMR, e vice-versa", "8 dias"],
+        ["II", "Da DInter/1 para a RMR, e vice-versa", "4 dias"],
+        ["III", "Da DInter/1 para a DInter/2 e vice-versa", "4 dias"],
+        ["IV", "Entre Unidades da DInter/1", "2 dias"],
+        ["V", "Entre Unidades da DInter/2", "2 dias"]
+      ],
+      nota: "Determinação: “À OME cedente para conceder gozo de trânsito aos militares movimentados, conforme estabelecido no Art. 15 do Decreto nº 7.510, de 18OUT81, de acordo com as lotações a seguir”."
+    }],
+    atencao: [
+      "Sem mudança de unidade, não há trânsito.",
+      "O trânsito pode ser gozado, no todo ou em parte, na localidade de origem ou na de destino; em outro local, só com autorização do órgão movimentador e sem ônus para o Estado (art. 15, §§ 2º e 3º).",
+      "Concluído o trânsito, siga para o destino na primeira condução previamente marcada (art. 15, § 4º).",
+      "Com mudança de residência, há também o período de instalação, concedido pelo Comandante da OME de destino e pedido nos primeiros 9 meses da apresentação; não cabe se você ou sua família já moram no destino (art. 16).",
+      "Para o transporte da mudança, o modelo tem opções próprias: 38 (Traslado de bagagem) e 03 (Ajuda de Custo) — confirme o cabimento com a Seção de Pessoal.",
+      "Na movimentação por interesse próprio, as despesas correm inteiramente por conta do requerente (art. 47, parágrafo único)."
+    ],
+    base: ["Lei estadual nº 6.783/1974 (Estatuto), art. 62, IV", "Decreto estadual nº 7.510/1981 (Regulamento de Movimentação), arts. 9º, 15, 16, 32, 38 e 47", "Portaria do Comando Geral nº 303/2025 (BGE nº 155/2025), art. 8º (apresentação na OME de destino)"],
     relacionados: [],
     minuta: {
       campos: [
         { id: "bge", rotulo: "BGE da movimentação (nº e data)", tipo: "texto", ex: "BGE nº 000, de 00/00/2026" },
         { id: "origem", rotulo: "OME de origem", tipo: "texto", ex: "7º GB" },
         { id: "destino", rotulo: "OME de destino", tipo: "texto" },
-        { id: "dias", rotulo: "Dias de trânsito (até 30)", tipo: "numero", min: 1, max: 30, unidade: ["dia", "dias"] },
+        { id: "dias", rotulo: "Dias de trânsito (quadro de lotações)", tipo: "numero", min: 1, max: 8, unidade: ["dia", "dias"] },
         { id: "inicio", rotulo: "Início", tipo: "data" }
       ],
       especificar: "Gozo de trânsito de {dias}, a contar de {inicio}, em razão da movimentação publicada no {bge}, do(a) {origem} para o(a) {destino}",
       amparo: "no art. 62, IV, da Lei estadual nº 6.783/1974",
       avisos: function (v, u) {
         const a = [], n = parseInt(v.dias, 10), d = u.data(v.inicio);
-        if (n > 30) a.push({ tipo: "erro", txt: "O trânsito é de até 30 dias." });
-        if (d && n > 0) { const fim = u.soma(d, n - 1); a.push({ tipo: "info", txt: "Último dia: " + u.fmt(fim) + " (" + u.semana(fim) + "). Apresentação no destino em " + u.fmt(u.soma(fim, 1)) + "." }); }
+        if (n > 8) a.push({ tipo: "erro", txt: "Pelas lotações, o trânsito é de 2, 4 ou 8 dias (quadro do guia)." });
+        if (d && n > 0) { const fim = u.soma(d, n - 1); a.push({ tipo: "info", txt: "Último dia: " + u.fmt(fim) + " (" + u.semana(fim) + "). Apresentação no destino em " + u.fmt(u.soma(fim, 1)) + ". O trânsito conta do desligamento da OME de origem, e o tempo de viagem não entra na conta (art. 15)." }); }
         return a;
       }
     }
@@ -1242,27 +1289,38 @@ const GUIAS = [
     resumo: "Seis meses de afastamento com remuneração integral a cada decênio de efetivo serviço, para quem não sofreu sanções que a desqualifiquem.",
     tags: ["licenca especial", "lesp", "decenio", "seis meses", "licenca premio", "10 anos", "dez anos"],
     quando: "Ao completar cada decênio (10 anos) de efetivo serviço, para gozar a licença correspondente.",
-    decide: "Praças: Comandante do 7º GB. Oficiais: Diretor de Gestão de Pessoas.",
+    decide: "Praças: Comandante do 7º GB. Oficiais: Diretor de Gestão de Pessoal.",
     destinatario: function (v) { return v.circulo === "Oficial" ? DEST.dgp : DEST.cmt; },
-    destinatarioRotulo: "Comandante do 7º GB (praças) ou Diretor de Gestão de Pessoas (oficiais)",
-    decideBase: "Estatuto, arts. 64 e 65; divisão entre oficiais e praças como na PMPE",
-    aConfirmar: true,
+    destinatarioRotulo: "Comandante do 7º GB (praças) ou Diretor de Gestão de Pessoal (oficiais)",
+    decideBase: "SUNOR nº 003/2011 (Portaria CG nº 003/11-DCP/DGP), art. 3º; cartilha da DGP sobre Licença Especial, obs. 1",
     prazo: "6 meses, de uma só vez ou em parcelas de 2 ou 3 meses por ano civil",
     passos: [
       { t: "Confirme o decênio", d: "Verifique na ficha funcional ou na CTS a data em que completou o decênio e se a LESP desse período ainda não foi gozada." },
+      { t: "Confira os impedimentos", d: "Veja no quadro abaixo as situações em que a Licença Especial não é concedida (SUNOR nº 003/2011, art. 6º)." },
       { t: "Planeje o período com a chefia", d: "Defina se vai gozar os 6 meses de uma só vez ou em parcelas de 2 ou 3 meses por ano civil (Estatuto, art. 65, § 1º). O parcelamento depende do seu pedido e da conveniência do serviço: alinhe com a escala." },
-      { t: "Chegou há pouco ao 7º GB?", d: "Confirme com a Seção de Pessoal se há interstício mínimo de efetivo serviço na OME antes do gozo." },
+      { t: "Chegou há pouco ao 7º GB?", d: "A Licença Especial não é concedida ao militar recentemente movimentado antes de decorridos 3 meses da apresentação na OME de destino (SUNOR nº 003/2011, art. 6º, c; cartilha da DGP sobre Licença Especial, obs. 2)." },
       P.abrir(),
       P.opcao("21", "o decênio de referência, a parcela e as datas pretendidas."),
       P.preencher(),
       P.anexar(),
       P.enviar(),
-      P.acompanhar("Durante o gozo, você fica na situação de adido à sua OBM de origem.")
+      P.acompanhar("O gozo fica condicionado à data da publicação da concessão (SUNOR nº 003/2011, art. 1º). Durante o gozo, você fica adido à OBM a que pertence (cartilha da DGP, obs. 5)."),
+      { t: "Ao terminar a licença", d: "Oficial: apresente-se na Diretoria de Gestão de Pessoal. Praça: na unidade em que está adida (SUNOR nº 003/2011, art. 11, § 1º). Quem não se apresenta ao término responde aos procedimentos disciplinares e criminais cabíveis (art. 20)." }
     ],
     docs: [REQ("21"), "Cópia do RG Militar"],
-    atencao: ["Sanções disciplinares podem desqualificar o decênio: confira sua situação antes de requerer.", "Não se afaste antes da publicação da concessão.", "Para certidão de LESP não gozada, a opção é a 13; para contagem em dobro, as opções 42 e 44."],
-    base: ["Lei estadual nº 6.783/1974 (Estatuto), art. 65, § 1º (duração e parcelamento)"],
-    relacionados: ["cts"],
+    quadros: [QUADRO_IMPEDIMENTOS_LE_LTIP],
+    ome: ["Informações do art. 21 do SUNOR 03/11 — tempo de efetivo serviço, licenças já gozadas, qual é a parcela da LESP correspondente e tempo na OME —, quando o pedido segue à DGP"],
+    atencao: [
+      "Sanções disciplinares podem desqualificar o decênio: confira sua situação antes de requerer.",
+      "Não se afaste antes da publicação da concessão.",
+      "Há limite de 5% do efetivo em gozo de Licença Especial: para oficiais, no posto, na corporação; para praças, na graduação, na OME. Atingido o limite, só em caráter excepcional, a critério do Comandante-Geral (SUNOR nº 003/2011, arts. 8º a 10).",
+      "Se você pedir a suspensão da licença, o restante é revogado; a licença revogada só pode ser requerida de novo 2 meses depois da revogação e em outro ano civil (art. 12).",
+      "Depois da licença-maternidade ou paternidade, há prioridade para gozar a Licença Especial adquirida, mediante requerimento, a partir do dia seguinte ao fim da licença, em sequência (Portaria CG nº 310/2025, art. 2º, IV e § 2º).",
+      "Vai pedir a promoção requerida ou a PCNH? Peça antes a Licença Especial: depois do protocolo da promoção requerida não se pode mais requerer o gozo (Portaria CG nº 299/2025, art. 6º, § 1º), e a licença tem de ser concedida antes do requerimento da PCNH (cartilha da DGP sobre a PCNH, obs. 7).",
+      "Para certidão de LESP não gozada, a opção é a 13; para contagem em dobro, as opções 42 e 44."
+    ],
+    base: ["Lei estadual nº 6.783/1974 (Estatuto), arts. 65 (§ 1º: duração e parcelamento), 67 e 121, § 2º", "SUNOR nº 003/2011 (Portaria CG nº 003/11-DCP/DGP), arts. 1º, 3º, 6º, 8º a 12, 20 e 21", "Portaria do Comando Geral nº 310/2025, art. 2º, IV e § 2º", "Cartilha informativa da DGP — Licença Especial"],
+    relacionados: ["cts", "promocao-requerida"],
     minuta: {
       campos: [
         { id: "circulo", rotulo: "Círculo", tipo: "lista", opcoes: ["Praça", "Oficial"] },
@@ -1274,7 +1332,7 @@ const GUIAS = [
       amparo: "no art. 65 da Lei estadual nº 6.783/1974",
       avisos: function (v, u) {
         const a = [], d = u.data(v.inicio), n = parseInt(v.meses, 10);
-        if (v.circulo) a.push({ tipo: "info", txt: v.circulo === "Oficial" ? "Para oficiais, a concessão é do Diretor de Gestão de Pessoas." : "Para praças, a concessão é do Comandante do 7º GB." });
+        if (v.circulo) a.push({ tipo: "info", txt: v.circulo === "Oficial" ? "Para oficiais, a concessão é do Diretor de Gestão de Pessoal." : "Para praças, a concessão é do Comandante do 7º GB." });
         if (d && n > 0) { const ret = u.retornoMeses(d, n), fim = u.soma(ret, -1); a.push({ tipo: "info", txt: "Último dia desta parcela: " + u.fmt(fim) + " (" + u.semana(fim) + "). Retorno em " + u.fmt(ret) + "." }); }
         return a;
       }
@@ -1287,38 +1345,55 @@ const GUIAS = [
     categoria: "afastamentos",
     icone: "pausa",
     opcao: "28",
-    resumo: "Afastamento sem remuneração, de até 2 anos contínuos, para militar com mais de 10 anos de efetivo serviço, concedido a critério da administração.",
-    tags: ["ltip", "interesse particular", "licenca sem vencimento", "sem remuneracao", "afastamento particular", "assuntos particulares"],
+    resumo: "Afastamento total do serviço, sem remuneração e sem contagem do tempo de efetivo serviço, por até 4 anos, para o militar com mais de 10 anos de efetivo serviço. A concessão é do Secretário de Defesa Social, de acordo com o interesse do serviço, ouvido o Comandante-Geral.",
+    tags: ["ltip", "interesse particular", "licenca sem vencimento", "sem remuneracao", "afastamento particular", "assuntos particulares", "prorrogacao"],
     quando: "Quando você precisa se afastar por motivo pessoal por um período longo, sem remuneração.",
-    decide: "Secretário de Defesa Social, com instrução da DGP",
-    destinatario: DEST.sds,
-    decideBase: "Estatuto, arts. 64, § 1º, b, e 66; requerimento à SDS, como na PMPE",
-    prazo: "Até 2 anos contínuos",
+    decide: "Secretário de Defesa Social, ouvido o Comandante-Geral",
+    destinatario: DEST.dgp,
+    decideBase: "Estatuto, art. 66, § 2º (redação da LC nº 314/2015), transcrito no Parecer PGE nº 171/2023; cartilha da DGP sobre LTIP, obs. 1; requerimento dirigido ao Diretor de Gestão de Pessoal (SUNOR nº 003/2011, art. 4º, § 1º)",
+    prazo: "Até 4 anos, de uma só vez ou em períodos de no mínimo 1 mês; prorrogação pedida com 30 dias de antecedência",
     passos: [
-      { t: "Confira os requisitos", d: "Mais de 10 anos de efetivo serviço. A concessão é discricionária: depende do interesse da administração." },
-      { t: "Avalie os efeitos antes de pedir", d: "Durante a LTIP não há remuneração e o período não conta como tempo de serviço, salvo recolhimento previdenciário próprio à FUNAPE. Tire as dúvidas com a Seção de Pessoal." },
+      { t: "Confira os requisitos", d: "Mais de 10 anos de efetivo serviço e não estar em nenhuma das situações do art. 6º do SUNOR nº 003/2011 (quadro abaixo). A concessão depende do interesse do serviço (Estatuto, art. 66, § 2º)." },
+      { t: "Avalie os efeitos antes de pedir", d: "A LTIP é concedida com prejuízo da remuneração e da contagem do tempo de efetivo serviço. Enquanto durar, não é possível contribuir para o Fundo de Proteção Social dos Militares (FPSM-PE), e o tempo não conta para a antiguidade no posto ou graduação (cartilha da DGP, obs. 2, 6 e 7). Tire as dúvidas com a Seção de Pessoal." },
+      { t: "Defina o período", d: "A LTIP é concedida pelo período que você pedir, de uma só vez ou em períodos de no mínimo 1 mês, sem passar do limite legal de 4 anos (SUNOR nº 003/2011, art. 13; Lei estadual nº 9.628/1984, art. 4º)." },
+      { t: "Preencha o Termo de Opção", d: "Ao requerer a LTIP, informe se deseja continuar contribuindo para o FUNAFIN, juntando ao requerimento o Termo de Opção de Permanência de Vínculo ao FUNAFIN, no modelo do Anexo Único da Portaria CG nº 003/11-DCP/DGP (SUNOR nº 003/2011, art. 4º, § 2º)." },
       P.abrir(),
       P.opcao("28", "o período pretendido e uma exposição objetiva dos motivos."),
       P.preencher(),
       P.anexar(),
       P.enviar(),
-      P.acompanhar("Não se afaste antes da publicação da concessão.")
+      P.acompanhar("Não se afaste antes da publicação da concessão: o gozo fica condicionado à data da publicação (SUNOR nº 003/2011, art. 1º)."),
+      { t: "Quer prorrogar?", d: "Se a LTIP foi concedida por menos de 4 anos, peça a prorrogação com pelo menos 30 dias de antecedência da data prevista para o término (SUNOR nº 003/2011, art. 13, § 1º)." },
+      { t: "Apresente-se no dia do retorno", d: "Terminada a licença, apresente-se à Diretoria de Gestão de Pessoal no dia marcado (SUNOR nº 003/2011, art. 11, § 2º). Se não se apresentar, é iniciado o procedimento de deserção; apresentando-se dentro do prazo de graça, até 8 dias depois da parte de falta, você responde por transgressão disciplinar (cartilha da DGP, obs. 4 e 5)." }
     ],
-    docs: [REQ("28"), "Cópia do RG Militar", "Exposição de motivos (recomendável)"],
-    atencao: ["Sem remuneração e sem contagem de tempo de serviço, salvo recolhimento à FUNAPE.", "A decisão é do Secretário de Defesa Social: protocole com antecedência suficiente."],
-    base: ["Lei estadual nº 6.783/1974 (Estatuto), art. 66"],
+    docs: [REQ("28"), "Cópia do RG Militar", "Termo de Opção de Permanência de Vínculo ao FUNAFIN (Anexo Único da Portaria CG nº 003/11-DCP/DGP)", "Exposição de motivos (recomendável)"],
+    quadros: [QUADRO_IMPEDIMENTOS_LE_LTIP],
+    ome: ["Informações do art. 21 da Portaria CG nº 003/11-DCP/DGP — tempo de efetivo serviço, licenças já gozadas e tempo na OME —, antes do envio à DGP"],
+    atencao: [
+      "Sem remuneração e sem contagem do tempo de efetivo serviço; durante a licença não é possível contribuir para o FPSM-PE, substituto do FUNAFIN (Lei Complementar estadual nº 460/2021, art. 8º; cartilha da DGP, obs. 2 e 7).",
+      "O tempo de LTIP não conta para a antiguidade no posto ou graduação, o que pode alterar a sua ordem de classificação (obs. 6).",
+      "O limite é de 4 anos (Lei nº 9.628/1984, art. 4º). Quem passa desse prazo não é transferido de ofício para a reserva remunerada: o art. 90, IV, do Estatuto foi revogado tacitamente por essa lei, e quem não se apresenta fica sujeito ao procedimento de deserção (Parecer PGE nº 171/2023).",
+      "Há limite de 5% do efetivo em gozo de LTIP: para oficiais, no posto, na corporação; para praças, na graduação, na OME. Atingido o limite, só em caráter excepcional, a critério do Comandante-Geral (SUNOR nº 003/2011, arts. 8º a 10).",
+      "Se você pedir a suspensão da licença, o restante é revogado; a licença revogada só pode ser requerida de novo 2 meses depois da revogação e em outro ano civil (art. 12).",
+      "A decisão é do Secretário de Defesa Social: protocole com antecedência suficiente."
+    ],
+    base: ["Lei estadual nº 6.783/1974 (Estatuto), arts. 51, 64, 66 (§ 2º na redação da LC nº 314/2015), 67, 75, 90 e 122", "Lei estadual nº 9.628/1984, art. 4º (LTIP de até 4 anos)", "SUNOR nº 003/2011 (Portaria CG nº 003/11-DCP/DGP), arts. 1º, 4º, § 2º, 6º, 8º a 13 e 21, e Anexo Único (Termo de Opção)", "Lei Complementar estadual nº 460/2021, art. 8º", "Parecer PGE nº 171/2023 (prazo de 4 anos e não apresentação ao término)", "Cartilha informativa da DGP — LTIP (atualizada em 21/05/2024)"],
     relacionados: ["lesp"],
     minuta: {
       campos: [
+        { id: "pedido", rotulo: "Pedido", tipo: "lista", opcoes: [["Concessão", "Licença para Tratar de Interesse Particular"], ["Prorrogação", "Prorrogação da Licença para Tratar de Interesse Particular"]] },
         { id: "inicio", rotulo: "Início pretendido", tipo: "data" },
-        { id: "meses", rotulo: "Duração (meses, até 24)", tipo: "numero", min: 1, max: 24, unidade: ["mês", "meses"] },
+        { id: "meses", rotulo: "Duração (meses)", tipo: "numero", min: 1, max: 48, unidade: ["mês", "meses"] },
         { id: "motivo", rotulo: "Motivo", tipo: "area" }
       ],
-      especificar: "Licença para Tratar de Interesse Particular pelo período de {meses}, a contar de {inicio}",
+      especificar: "{pedido} pelo período de {meses}, a contar de {inicio}",
       extra: "Motivo: {motivo}",
       amparo: "no art. 66 da Lei estadual nº 6.783/1974",
       avisos: function (v) {
-        return parseInt(v.meses, 10) > 24 ? [{ tipo: "erro", txt: "A LTIP é de até 2 anos (24 meses) contínuos." }] : [];
+        const a = [];
+        if (parseInt(v.meses, 10) > 48) a.push({ tipo: "erro", txt: "A LTIP é de até 4 anos (48 meses) (Lei estadual nº 9.628/1984, art. 4º; SUNOR nº 003/2011, art. 13)." });
+        if (v.pedido === "Prorrogação") a.push({ tipo: "info", txt: "Peça a prorrogação com pelo menos 30 dias de antecedência da data prevista para o término da LTIP em gozo (SUNOR nº 003/2011, art. 13, § 1º)." });
+        return a;
       }
     }
   },
@@ -1349,8 +1424,8 @@ const GUIAS = [
       P.acompanhar()
     ],
     docs: [REQ("32"), "Cópia do RG Militar", "Atestado ou relatório médico (acesso restrito)", "Ata ou laudo de inspeção da JMS, quando emitido (acesso restrito)"],
-    atencao: ["Não escreva diagnóstico nem CID no texto do requerimento: essa informação fica só nos anexos restritos.", "Licença ininterrupta por mais de 1 ano acarreta agregação ao quadro."],
-    base: ["Lei estadual nº 6.783/1974 (Estatuto)"],
+    atencao: ["No item 1 do requerimento, o campo Endereço serve para você informar o lugar onde vai cumprir a licença.", "Não escreva diagnóstico nem CID no texto do requerimento: essa informação fica só nos anexos restritos.", "Licença ininterrupta por mais de 1 ano acarreta agregação ao quadro.", "Problema de saúde durante as férias não interrompe as férias, e a licença não pode ser concedida depois (Portaria CG nº 312/2025, art. 11, § 3º; cartilha da DGP sobre férias)."],
+    base: ["Lei estadual nº 6.783/1974 (Estatuto)", "Portaria do Comando Geral nº 312/2025, art. 11, § 3º"],
     relacionados: ["ltspf", "horario-pcd"],
     minuta: {
       campos: [
@@ -1360,6 +1435,7 @@ const GUIAS = [
       ],
       especificar: "Licença para Tratamento de Saúde Própria pelo período de {dias}, a contar de {inicio}, conforme atestado médico datado de {atestado}, anexado com acesso restrito",
       amparo: "na Lei estadual nº 6.783/1974 (Estatuto dos Militares)",
+      rotuloEndereco: "Endereço onde vai cumprir a licença",
       avisos: function (v, u) {
         const d = u.data(v.inicio), n = parseInt(v.dias, 10);
         if (!d || !(n > 0)) return [];
@@ -1375,39 +1451,50 @@ const GUIAS = [
     categoria: "saude",
     icone: "familia",
     opcao: "31",
-    resumo: "Afastamento para assistir cônjuge, ascendente ou descendente doente, quando a sua presença for indispensável e incompatível com o serviço.",
-    tags: ["familiar doente", "acompanhar familiar", "pai doente", "mae doente", "filho doente", "conjuge doente", "ltspf", "cuidar de familiar"],
-    quando: "Quando um familiar próximo precisa da sua assistência direta e isso é incompatível com o exercício das funções.",
-    decide: "Comandante do 7º GB, com base na inspeção da JMS",
-    destinatario: DEST.cmt,
-    decideBase: "Concessão na OME, como na PMPE (INCG nº 614/2024)",
-    aConfirmar: true,
-    prazo: "Mais de 6 meses contínuos acarreta agregação; após 1 ano, o período deixa de contar como tempo de serviço",
+    resumo: "Afastamento para prestar assistência a pessoa da família doente, quando a sua assistência direta for indispensável e não houver outro membro da família em condições de prestá-la adequadamente.",
+    tags: ["familiar doente", "acompanhar familiar", "pai doente", "mae doente", "filho doente", "conjuge doente", "irmao doente", "irma doente", "menor sob guarda", "tutela", "ltspf", "cuidar de familiar"],
+    quando: "Quando a sua assistência direta ao familiar é indispensável, não há outro membro da família em condições de prestá-la e ela não pode ser prestada junto com o serviço nem com compensação de horário.",
+    decide: "Praças: Comandante do 7º GB. Oficiais: Diretor de Gestão de Pessoal.",
+    destinatario: function (v) { return v.circulo === "Oficial" ? DEST.dgp : DEST.cmt; },
+    destinatarioRotulo: "Comandante do 7º GB (praças) ou Diretor de Gestão de Pessoal (oficiais)",
+    decideBase: "SUNOR nº 003/2011 (Portaria CG nº 003/11-DCP/DGP), art. 15; cartilha da DGP sobre LTSPF, obs. 1",
+    prazo: "Até 30 dias, prorrogáveis por iguais períodos. Mais de 6 meses contínuos acarreta agregação; após 1 ano, o período deixa de contar como tempo de serviço",
     passos: [
-      { t: "Reúna o relatório médico do familiar", d: "O documento deve indicar a necessidade de acompanhamento e o período estimado." },
-      { t: "Comprove o parentesco", d: "Certidão de casamento ou de união estável (cônjuge) ou de nascimento (pais e filhos)." },
+      { t: "Reúna o laudo médico do familiar", d: "O laudo deve descrever a necessidade de acompanhamento do paciente em período integral e informar, de forma minuciosa, a patologia do familiar (SUNOR nº 003/2011, art. 16; cartilha da DGP sobre LTSPF)." },
+      { t: "Comprove o parentesco", d: "Certidão de casamento ou de união estável (cônjuge ou companheiro), de nascimento (filhos, pais e irmãos) ou termo de guarda ou tutela (menor)." },
       P.abrir(),
       P.opcao("31", "o nome e o parentesco do familiar, o período e por que a sua assistência é indispensável."),
       P.preencher(),
       P.anexar(true),
       P.enviar(),
-      P.acompanhar()
+      { t: "Pesquisa social", d: "A indispensabilidade da sua assistência, e a impossibilidade de prestá-la junto com o serviço ou com compensação de horário, são comprovadas por pesquisa social feita por militar designado pelo Comandante da OME (SUNOR nº 003/2011, art. 16, §§ 2º e 3º)." },
+      P.acompanhar("O gozo fica condicionado à data da publicação da concessão (SUNOR nº 003/2011, art. 1º)."),
+      { t: "Prorrogação, suspensão e término", d: "Para prorrogar, comprove a necessidade e cumpra de novo as exigências do laudo e da pesquisa social (art. 17). Antes do término previsto, você pode pedir a suspensão ou a prorrogação (art. 18). Cessada a causa, a licença é revogada de ofício; quem não se apresenta quando cessa a causa, ou desvirtua a finalidade da licença, responde aos procedimentos disciplinares e criminais cabíveis (arts. 19 e 20)." }
     ],
-    docs: [REQ("31"), "Cópia do RG Militar", "Relatório ou laudo médico do familiar (acesso restrito)", "Comprovante de parentesco"],
-    atencao: ["A remuneração é integral nos primeiros meses; mais de 6 meses contínuos acarreta agregação.", "Depois de 1 ano, o período deixa de contar como tempo de serviço."],
-    base: ["Lei estadual nº 6.783/1974 (Estatuto)"],
+    docs: [REQ("31"), "Cópia do RG Militar", "Laudo médico do familiar, com a necessidade de acompanhamento em período integral e a patologia descrita (acesso restrito)", "Comprovante de parentesco (certidão de casamento, de união estável ou de nascimento, ou termo de guarda ou tutela)"],
+    atencao: [
+      "Para a LTSPF, pessoa da família é: cônjuge ou companheiro(a) legal, filho, pai e mãe, irmãos e menor sob sua guarda ou tutela (SUNOR nº 003/2011, art. 16, § 1º; cartilha da DGP, obs. 3).",
+      "A licença é concedida por até 30 dias, prorrogáveis por iguais períodos (SUNOR nº 003/2011, art. 17; cartilha da DGP, obs. 2).",
+      "A remuneração é integral nos primeiros meses; mais de 6 meses contínuos acarreta agregação.",
+      "Depois de 1 ano, o período deixa de contar como tempo de serviço."
+    ],
+    base: ["Lei estadual nº 6.783/1974 (Estatuto), arts. 64, 67, § 2º, 75, § 1º, c, V, 90, V, e 122, § 3º, a", "SUNOR nº 003/2011 (Portaria CG nº 003/11-DCP/DGP), arts. 1º e 15 a 20", "Cartilha informativa da DGP — LTSPF"],
     relacionados: ["ltsp", "horario-pcd"],
     minuta: {
       campos: [
+        { id: "circulo", rotulo: "Círculo", tipo: "lista", opcoes: ["Praça", "Oficial"] },
         { id: "familiar", rotulo: "Nome do familiar", tipo: "texto" },
-        { id: "parentesco", rotulo: "Parentesco", tipo: "lista", opcoes: [["Cônjuge/companheiro(a)", "seu cônjuge/companheiro(a)"], ["Pai", "seu pai"], ["Mãe", "sua mãe"], ["Filho(a)", "seu(sua) filho(a)"], ["Outro ascendente ou descendente", "seu(sua) familiar"]] },
+        { id: "parentesco", rotulo: "Parentesco", tipo: "lista", opcoes: [["Cônjuge/companheiro(a)", "seu cônjuge/companheiro(a)"], ["Pai", "seu pai"], ["Mãe", "sua mãe"], ["Filho(a)", "seu(sua) filho(a)"], ["Irmão", "seu irmão"], ["Irmã", "sua irmã"], ["Menor sob guarda ou tutela", "menor sob sua guarda ou tutela"]] },
         { id: "inicio", rotulo: "Início", tipo: "data" },
-        { id: "dias", rotulo: "Período estimado (dias)", tipo: "numero", min: 1, unidade: ["dia", "dias"] }
+        { id: "dias", rotulo: "Período (dias, até 30)", tipo: "numero", min: 1, max: 30, unidade: ["dia", "dias"] }
       ],
-      especificar: "Licença para Tratamento de Saúde de Pessoa da Família, para assistir {parentesco}, {familiar}, pelo período de {dias}, a contar de {inicio}, conforme relatório médico anexado com acesso restrito",
+      especificar: "Licença para Tratamento de Saúde de Pessoa da Família, para assistir {parentesco}, {familiar}, pelo período de {dias}, a contar de {inicio}, conforme laudo médico anexado com acesso restrito",
       amparo: "na Lei estadual nº 6.783/1974 (Estatuto dos Militares)",
       avisos: function (v) {
-        return parseInt(v.dias, 10) > 180 ? [{ tipo: "alerta", txt: "Mais de 6 meses contínuos de LTSPF acarreta agregação." }] : [];
+        const a = [];
+        if (v.circulo) a.push({ tipo: "info", txt: v.circulo === "Oficial" ? "Para oficiais, a concessão é do Diretor de Gestão de Pessoal." : "Para praças, a concessão é do Comandante do 7º GB." });
+        if (parseInt(v.dias, 10) > 30) a.push({ tipo: "alerta", txt: "A LTSPF é concedida por até 30 dias, prorrogáveis por iguais períodos (SUNOR nº 003/2011, art. 17)." });
+        return a;
       }
     }
   },
@@ -1419,7 +1506,7 @@ const GUIAS = [
     icone: "berco",
     opcao: "30",
     resumo: "180 dias consecutivos, com remuneração integral, para a militar gestante ou adotante.",
-    tags: ["maternidade", "gestante", "gravidez", "gravida", "parto", "nascimento", "adocao", "licenca gestante", "bebe", "mae"],
+    tags: ["maternidade", "gestante", "gravidez", "gravida", "parto", "nascimento", "adocao", "licenca gestante", "bebe", "mae", "pre-natal", "lactante", "amamentar"],
     quando: "No nascimento, a partir do 8º mês de gestação (com atestado) ou na adoção.",
     decide: "Comandante do 7º GB",
     destinatario: DEST.cmt,
@@ -1427,6 +1514,7 @@ const GUIAS = [
     aConfirmar: true,
     prazo: "180 dias consecutivos",
     passos: [
+      { t: "Gestante: comunique a chefia", d: "Ao saber da gestação, comunique a sua condição à chefia imediata, com atestado médico e cópia do exame de sangue ou do ultrassom; informar é responsabilidade sua (Portaria CG nº 310/2025, art. 2º, caput e § 1º). Ficam assegurados a indisponibilidade para atividades operacionais, com realocação para a Jornada de Trabalho Regular (JTR), e os afastamentos para as consultas de pré-natal, com a apresentação imediata da declaração de comparecimento (art. 2º, I e II). Em gravidez de risco, informe ao Comandante as orientações médicas (art. 2º, § 4º)." },
       { t: "Defina o marco de início", d: "A licença começa com o nascimento ou, mediante atestado médico, a partir do 8º mês de gestação. Na adoção, conta a partir da guarda ou da adoção." },
       P.abrir(),
       P.opcao("30", "o fato gerador (nascimento, atestado do 8º mês ou adoção), a data e o início da licença. O modelo pede comprovação."),
@@ -1434,12 +1522,17 @@ const GUIAS = [
       P.anexar(true),
       P.enviar(),
       P.acompanhar(),
-      { t: "Depois do nascimento", d: "Inclua a criança como dependente no SISMEPE (opção 25) e, se for o caso, para dedução do imposto de renda (opção 26)." }
+      { t: "Depois do nascimento", d: "Inclua a criança como dependente no SISMEPE (opção 25) e, se for o caso, para dedução do imposto de renda (opção 26)." },
+      { t: "Na volta ao trabalho", d: "Com filho(a) de até 2 anos, você pode requerer a jornada que melhor se adeque à sua rotina e se ausentar 30 minutos a cada 4 horas de serviço para amamentar ou fazer a ordenha (Portaria CG nº 310/2025, arts. 3º a 5º): veja o guia da jornada da bombeira lactante." }
     ],
     docs: [REQ("30"), "Cópia do RG Militar", "Certidão de nascimento da criança ou atestado médico a partir do 8º mês de gestação (acesso restrito)", "Na adoção: termo de guarda ou sentença de adoção"],
-    atencao: ["O atestado de gestação deve ir com acesso restrito no SEI."],
-    base: ["Lei estadual nº 6.783/1974 (Estatuto), com alterações posteriores"],
-    relacionados: ["paternidade", "sismepe", "dependentes-sadrh"],
+    atencao: [
+      "O atestado de gestação deve ir com acesso restrito no SEI.",
+      "Depois da licença, há prioridade para gozar a Licença Especial adquirida, mediante requerimento, e as férias pendentes, a partir do dia seguinte ao fim da licença-maternidade, em sequência (Portaria CG nº 310/2025, art. 2º, IV).",
+      "Nascimento ou adoção durante as férias não interrompe as férias, e a licença não pode ser concedida depois (Portaria CG nº 312/2025, art. 11, § 3º; cartilha da DGP sobre férias)."
+    ],
+    base: ["Lei estadual nº 6.783/1974 (Estatuto), com alterações posteriores", "Portaria do Comando Geral nº 310/2025 (gestantes e lactantes), arts. 2º a 5º", "Portaria do Comando Geral nº 312/2025, art. 11, § 3º"],
+    relacionados: ["paternidade", "lactante-jornada", "sismepe", "dependentes-sadrh"],
     minuta: {
       campos: [
         { id: "evento", rotulo: "Fato gerador", tipo: "lista", opcoes: [["Nascimento", "do nascimento de seu(sua) filho(a)"], ["8º mês de gestação (atestado)", "de atestado médico de gestação a partir do 8º mês"], ["Adoção ou guarda para adoção", "da adoção/guarda para fins de adoção"]] },
@@ -1477,8 +1570,12 @@ const GUIAS = [
       { t: "Depois do nascimento", d: "Inclua a criança como dependente no SISMEPE (opção 25) e, se for o caso, para dedução do imposto de renda (opção 26)." }
     ],
     docs: [REQ("29"), "Cópia do RG Militar", "Certidão de nascimento do(a) filho(a) ou termo de guarda/adoção"],
-    atencao: ["O prazo é contado em dias consecutivos."],
-    base: ["Lei estadual nº 6.783/1974 (Estatuto), com alterações posteriores"],
+    atencao: [
+      "O prazo é contado em dias consecutivos.",
+      "Depois da licença, há prioridade para gozar a Licença Especial adquirida, mediante requerimento, e as férias pendentes, a partir do dia seguinte ao fim da licença-paternidade, em sequência (Portaria CG nº 310/2025, art. 2º, IV e § 2º).",
+      "Nascimento ou adoção durante as férias não interrompe as férias, e a licença não pode ser concedida depois (Portaria CG nº 312/2025, art. 11, § 3º; cartilha da DGP sobre férias)."
+    ],
+    base: ["Lei estadual nº 6.783/1974 (Estatuto), com alterações posteriores", "Portaria do Comando Geral nº 310/2025, art. 2º, IV e § 2º", "Portaria do Comando Geral nº 312/2025, art. 11, § 3º"],
     relacionados: ["maternidade", "sismepe", "dependentes-sadrh"],
     minuta: {
       campos: [
@@ -1492,48 +1589,173 @@ const GUIAS = [
     }
   },
 
+  /* Bombeira lactante: Portaria CG nº 310/2025 (gestantes e lactantes), arts. 3º a 7º */
+  {
+    id: "lactante-jornada",
+    titulo: "Jornada da bombeira lactante",
+    categoria: "saude",
+    icone: "berco",
+    opcao: "47",
+    resumo: "Ao voltar ao trabalho depois do parto, a bombeira com filho(a) de até 2 anos pode requerer a jornada que melhor se adeque à sua rotina: expediente administrativo (JTR) ou apoio operacional aquartelado em escala de 12h x 36h diurna ou de 24h x 72h (JTEsp). A concessão vale por até 6 meses e pode ser renovada.",
+    tags: ["lactante", "amamentacao", "amamentar", "ordenha", "jornada", "volta da licenca maternidade", "retorno ao trabalho", "jtr", "jtesp", "12x36", "24x72", "expediente", "bebe", "filho de ate 2 anos", "portaria 310"],
+    quando: "Ao retornar à atividade depois do parto, enquanto amamenta filho(a) de até 2 anos (Portaria CG nº 310/2025, arts. 3º e 4º).",
+    decide: "Comandante do 7º GB, com homologação da DGP",
+    destinatario: DEST.cmt,
+    decideBase: "Portaria CG nº 310/2025, art. 4º, I e § 1º",
+    prazo: "Até 6 meses por concessão; para continuar, novo requerimento",
+    passos: [
+      { t: "Escolha a jornada", d: "JTR: atividade administrativa, de segunda a sexta-feira, de forma presencial. JTEsp: serviço de apoio operacional aquartelado, na escala de 12h x 36h, no período diurno, ou na escala de 24h x 72h (Portaria CG nº 310/2025, art. 3º)." },
+      { t: "Separe os documentos", d: "Cópia do registro de nascimento do(a) filho(a) e documento médico que comprove o estado de lactação (art. 4º, II e III)." },
+      P.abrir(),
+      P.opcao("47", "“Designação de jornada de trabalho — bombeira lactante”, com a jornada pretendida, o nome e a data de nascimento do(a) filho(a)."),
+      P.preencher(),
+      P.anexar(true),
+      P.enviar(),
+      P.acompanhar("O Comandante se posiciona sobre o pedido e, acolhendo-o, encaminha à DGP para homologação e publicação em BGE (art. 4º, § 1º)."),
+      { t: "Renove ou peça a revogação", d: "A concessão vale por até 6 meses: para continuar, faça novo requerimento (art. 4º, § 2º). Terminada a lactação, requeira ao Comandante a revogação do benefício, mesmo que a concessão ainda esteja em vigor (art. 4º, § 3º)." }
+    ],
+    docs: [REQ("47"), "Cópia do RG Militar", "Cópia do registro de nascimento do(a) filho(a)", "Documento médico que comprove o estado de lactação (acesso restrito)"],
+    atencao: [
+      "Durante a lactação, você pode se ausentar 30 minutos a cada 4 horas de serviço para amamentar ou fazer a ordenha, em espaço destinado a isso na unidade, até o bebê completar 2 anos ou até o desmame, o que vier primeiro (arts. 5º e 6º).",
+      "Gestante ou lactante pode requerer movimentação para unidade que permita melhor assistência à sua saúde ou à do bebê, concedida conforme a disponibilidade da administração; para isso, a gestação e a lactação equivalem a motivo de saúde (art. 7º).",
+      "Matriculada em curso de formação, aperfeiçoamento ou progressão na carreira, as concessões valem conforme as condições do curso, sem quebrar a igualdade com os demais participantes (art. 9º)."
+    ],
+    base: ["Portaria do Comando Geral nº 310/2025 (gestantes e lactantes), arts. 3º a 7º e 9º"],
+    relacionados: ["maternidade", "lesp"],
+    minuta: {
+      campos: [
+        { id: "jornada", rotulo: "Jornada pretendida", tipo: "lista", opcoes: [["JTR — expediente administrativo, de segunda a sexta", "Jornada de Trabalho Regular (JTR), em atividade administrativa, de segunda a sexta-feira, de forma presencial"], ["JTEsp — 12h x 36h, diurno", "Jornada de Trabalho Especial (JTEsp), em serviço de apoio operacional aquartelado, na escala de 12h x 36h, no período diurno"], ["JTEsp — 24h x 72h", "Jornada de Trabalho Especial (JTEsp), em serviço de apoio operacional aquartelado, na escala de 24h x 72h"]] },
+        { id: "filho", rotulo: "Nome do(a) filho(a)", tipo: "texto" },
+        { id: "nascimento", rotulo: "Data de nascimento do(a) filho(a)", tipo: "data" }
+      ],
+      especificar: "Designação para a {jornada}, na condição de lactante, com filho(a) {filho}, nascido(a) em {nascimento}",
+      amparo: "nos arts. 3º e 4º da Portaria do Comando Geral nº 310/2025",
+      avisos: function (v, u) {
+        const a = [], n = u.data(v.nascimento);
+        if (!n) return a;
+        if (n > u.hoje()) return [{ tipo: "erro", txt: "A data de nascimento não pode ser posterior a hoje: confira a data informada." }];
+        const dois = u.somaMeses(n, 24);
+        if (dois <= u.hoje()) a.push({ tipo: "alerta", txt: "Pela data informada, a criança já completou 2 anos: a escolha de jornada é para a bombeira com filho(a) de até 2 anos (Portaria CG nº 310/2025, art. 4º)." });
+        else a.push({ tipo: "info", txt: "A criança completa 2 anos em " + u.fmt(dois) + ". Cada concessão vale por até 6 meses (art. 4º, § 2º)." });
+        return a;
+      }
+    }
+  },
+
   {
     id: "horario-pcd",
     titulo: "Horário especial — dependente com deficiência ou TEA",
     categoria: "saude",
     icone: "relogio",
     opcao: "47",
-    resumo: "Redução de até 50% da carga horária, sem prejuízo da remuneração, para acompanhar filho ou dependente legal com deficiência ou Transtorno do Espectro Autista.",
-    tags: ["horario especial", "pcd", "tea", "autismo", "autista", "deficiencia", "reducao de carga horaria", "dependente", "terapia"],
-    quando: "Quando seu filho ou dependente legal com deficiência ou TEA precisa do seu acompanhamento direto.",
-    decide: "A confirmar com a Seção de Pessoal",
+    resumo: "Horário especial de trabalho, sem prejuízo dos vencimentos, para o militar que tem filho com deficiência ou detém a tutela, a curatela ou a guarda judicial de pessoa com deficiência, comprovada a necessidade pela Junta Militar de Saúde. A jornada regular não fica abaixo de 4 horas diárias ou 20 semanais.",
+    tags: ["horario especial", "pcd", "tea", "autismo", "autista", "deficiencia", "reducao de carga horaria", "jornada reduzida", "dependente", "terapia", "tutela", "curatela", "guarda judicial", "relatorio de frequencia", "portaria 306"],
+    quando: "Quando o seu filho, tutelado, curatelado ou pessoa sob sua guarda judicial, com deficiência, precisa do seu acompanhamento em tratamento ou atividade (Portaria CG nº 306/2025, arts. 2º e 3º).",
+    decide: "Diretoria de Gestão de Pessoal (DGP), por Portaria Administrativa, com base no laudo da JMS",
     destinatario: DEST.dgp,
-    decideBase: "LC nº 375/2017 e Decreto nº 45.185/2017, citados pela PMPE; autoridade não localizada",
-    aConfirmar: true,
-    prazo: "",
+    decideBase: "Portaria CG nº 306/2025, arts. 3º, 4º e 6º",
+    prazo: "Relatório de frequência todo mês, até o dia 10; reavaliação ou renovação a cada 24 meses",
     passos: [
-      { t: "Obtenha o laudo médico", d: "Ele deve trazer o CID e declarar expressamente a necessidade de acompanhamento direto pelo(a) militar." },
-      { t: "Comprove o vínculo e a dependência", d: "Certidão de nascimento, termo de guarda ou tutela e comprovante de dependência econômica." },
-      { t: "Proponha os horários", d: "Descreva a redução pretendida (até 50%) e os horários de acompanhamento: terapias, escola, consultas." },
+      { t: "Reúna os documentos", d: "Identidade funcional; documento de identificação, com foto, do filho, tutelado, curatelado ou pessoa sob sua guarda judicial; documento que comprove a filiação, a tutela, a curatela ou a guarda judicial; e atestados, laudos e declarações que comprovem e justifiquem a necessidade, com o tratamento ou a atividade e os respectivos períodos, dias, horários ou duração (Portaria CG nº 306/2025, art. 3º, I a III). Esses documentos devem ser emitidos por profissional habilitado, registrado no órgão de classe e diretamente responsável pelo tratamento ou acompanhamento (art. 3º, § 2º)." },
+      { t: "Defina a redução e os horários", d: "No requerimento, justifique o pedido, especifique a redução pretendida e indique os dias, turnos ou horários de ausência ao trabalho (art. 3º). A jornada regular não pode ficar abaixo de 4 horas diárias ou 20 semanais, consideradas as necessidades do dependente (art. 2º, § 1º)." },
       P.abrir(),
-      P.opcao("47", "“Horário especial para acompanhamento de dependente”, com o dependente, o vínculo, a redução e os horários propostos."),
+      P.opcao("47", "“Horário especial de trabalho”, com o dependente, o vínculo, a redução pretendida, os dias, turnos ou horários de ausência e a justificativa."),
       P.preencher(),
       P.anexar(true),
       P.enviar(),
-      P.acompanhar()
+      { t: "Compareça à perícia da JMS", d: "A Seção de Pessoal agenda a perícia na Junta Militar de Saúde e informa local, data e hora (art. 4º, II e III). Compareça com o filho, tutelado, curatelado ou pessoa sob sua guarda judicial e com os documentos do primeiro passo (art. 5º)." },
+      { t: "Acompanhe até a Portaria da DGP", d: "A OME publica o resultado do laudo em BGE Reservado (BGER) e envia o processo à DGP, que decide e formaliza a concessão por Portaria Administrativa (arts. 4º, IV e V, e 6º, § 1º). Até a decisão, mantenha a jornada estabelecida (art. 6º, § 2º). Negado o pedido, cabe recurso em 10 dias úteis, dirigido ao Diretor da DGP (art. 15)." },
+      { t: "Todo mês: relatório de frequência", d: "Até o dia 10 do mês seguinte, entregue à Seção de Pessoal o relatório do Anexo Único da Portaria CG nº 306/2025, com todas as declarações de comparecimento emitidas pelo profissional responsável. Cada declaração traz o nome da pessoa em tratamento, o nome de quem a acompanhou e o dia, o horário e a duração do atendimento (art. 17)." },
+      { t: "Novo tratamento: peça a modificação", d: "Se o dependente iniciar novo tratamento, atividade ou acompanhamento em dia e horário ainda não alcançados, faça novo requerimento no mesmo processo SEI do pedido original, só com os documentos do novo tratamento, dentro da validade da perícia (art. 7º, §§ 1º e 2º). Mantenha o horário já concedido até a nova Portaria da DGP (art. 7º, § 5º)." },
+      { t: "A cada 24 meses: reavaliação ou renovação", d: "Persistindo os motivos, requeira ao titular da OME a reavaliação, no máximo a cada 24 meses, com a redução pretendida e os dias, turnos ou horários, e peça à Seção de Pessoal o agendamento da perícia (art. 9º, caput e § 1º). Nos casos de TEA e de deficiência permanente ou irreversível atestada pela JMS, não há nova perícia: requeira à OME a renovação a cada 24 meses, com os documentos dos incisos I e II do art. 3º atualizados (arts. 9º, § 5º, e 10)." },
+      { t: "Cessaram os motivos? Peça o cancelamento", d: "É seu dever requerer o cancelamento, comunicar logo a Seção de Pessoal e retomar a jornada normal em até 10 dias corridos, sob pena de apuração de falta funcional (art. 8º)." }
     ],
-    docs: [REQ("47"), "Cópia do RG Militar", "Laudo médico com CID e declaração da necessidade de acompanhamento direto (acesso restrito)", "Comprovante de dependência econômica e do vínculo (filiação, guarda ou tutela)"],
-    atencao: ["O CID fica só no laudo anexado com acesso restrito, nunca no texto do requerimento."],
-    base: ["Lei Complementar estadual nº 375/2017 e art. 174-A da Lei estadual nº 6.123/1968 (LC nº 371/2017), citados no modelo da PMPE — aplicação ao CBMPE a confirmar", "Decreto estadual nº 45.185/2017"],
+    docs: [REQ("47"), "Cópia do RG Militar (identidade funcional)", "Documento de identificação, com foto, do filho, tutelado, curatelado ou pessoa sob guarda judicial", "Documento que comprove a filiação, a tutela, a curatela ou a guarda judicial", "Atestados, laudos e declarações que justifiquem a necessidade, com o tratamento ou a atividade e os dias, horários ou duração (acesso restrito)"],
+    quadros: [{
+      titulo: "Relatório mensal de frequência (Anexo Único)",
+      cab: ["Parte do relatório", "O que informar"],
+      linhas: [
+        ["I – Referências", "A Portaria do Comando Geral nº 306/2025 e a Portaria Administrativa da DGP que concedeu o horário especial (nº, data e nº do processo SEI)"],
+        ["II – Seus dados", "Nome, posto ou graduação, matrícula e OME"],
+        ["III – Comparecimentos", "Tabela com data, dia da semana, horário (período), comprovantes de comparecimento (nº do documento SEI) e observações"],
+        ["Assinatura", "Nome, posto ou graduação e função"]
+      ],
+      nota: "Modelo completo no Anexo Único da Portaria CG nº 306/2025 (processo SEI nº 3900000728.000259/2025-10). Entregue até o dia 10 do mês seguinte (art. 17)."
+    }],
+    atencao: [
+      "Só 1 militar ou servidor estadual pode ter horário especial em relação à mesma pessoa com deficiência (art. 16).",
+      "Com o horário especial, você pode estar na escala de plantão (1 hora de trabalho para 3 de descanso), na jornada especial ou extraordinária e no PJES, desde que mantida a jornada mínima e sem escala nos dias e horários do dependente (arts. 2º, § 3º, e 13).",
+      "Laudos que atestem TEA, da rede pública ou privada, valem por tempo indeterminado para o horário especial (art. 10, § 5º).",
+      "Descumprir as obrigações pode levar à revogação da concessão, sem prejuízo das medidas disciplinares (art. 11).",
+      "Quem já tinha horário especial concedido também se adequa à Portaria CG nº 306/2025 (art. 18).",
+      "O CID e o diagnóstico ficam só nos anexos com acesso restrito, nunca no texto do requerimento."
+    ],
+    base: ["Portaria do Comando Geral nº 306/2025, que revogou a Portaria CG nº 113/2018", "Lei Complementar estadual nº 371/2017 (alterada pela LC nº 516/2022) e Decreto estadual nº 45.185/2017 (alterado pelo Decreto nº 56.643/2024)", "Lei Complementar estadual nº 375/2017 (extensão aos militares estaduais)", "Lei estadual nº 15.487/2015 (pessoa com TEA), art. 2º"],
     relacionados: ["ltspf", "sismepe"],
     minuta: {
       campos: [
+        { id: "pedido", rotulo: "Pedido", tipo: "lista", opcoes: [["Concessão", "Concessão de horário especial de trabalho"], ["Modificação (novo tratamento)", "Modificação do horário especial de trabalho já concedido"], ["Reavaliação (a cada 24 meses)", "Reavaliação do horário especial de trabalho já concedido"], ["Renovação (TEA ou deficiência permanente)", "Renovação do horário especial de trabalho já concedido"]] },
         { id: "dependente", rotulo: "Nome do dependente", tipo: "texto" },
-        { id: "vinculo", rotulo: "Vínculo", tipo: "lista", opcoes: [["Filho(a)", "seu(sua) filho(a)"], ["Dependente sob guarda", "dependente sob sua guarda"], ["Dependente sob tutela", "dependente sob sua tutela"]] },
-        { id: "reducao", rotulo: "Redução pretendida (%)", tipo: "numero", min: 1, max: 50 },
-        { id: "horarios", rotulo: "Horários propostos", tipo: "area", ex: "Ex.: terças e quintas, das 13h às 17h (terapias)" }
+        { id: "vinculo", rotulo: "Vínculo", tipo: "lista", opcoes: [["Filho(a)", "seu(sua) filho(a)"], ["Tutelado(a)", "pessoa sob sua tutela"], ["Curatelado(a)", "pessoa sob sua curatela"], ["Sob guarda judicial", "pessoa sob sua guarda judicial"]] },
+        { id: "reducao", rotulo: "Redução pretendida", tipo: "texto", largo: true, ex: "Ex.: 10 horas semanais (de 40 para 30)" },
+        { id: "horarios", rotulo: "Dias, turnos ou horários de ausência", tipo: "area", ex: "Ex.: terças e quintas, das 13h às 17h (terapias)" },
+        { id: "justificativa", rotulo: "Justificativa", tipo: "area" }
       ],
-      especificar: "Horário especial, com redução de {reducao}% da carga horária e sem prejuízo da remuneração, para acompanhamento de {vinculo}, {dependente}, pessoa com deficiência/TEA",
-      extra: "Horários propostos: {horarios}",
-      amparo: "[dispositivo legal informado pela Seção de Pessoal]",
+      especificar: "{pedido}, sem prejuízo dos vencimentos, para acompanhamento de {vinculo}, {dependente}, pessoa com deficiência, com redução de {reducao}",
+      extra: "Dias, turnos ou horários de ausência ao trabalho: {horarios}. Justificativa: {justificativa}",
+      amparo: "na Lei Complementar estadual nº 375/2017 e na Portaria do Comando Geral nº 306/2025",
       avisos: function (v) {
-        return parseInt(v.reducao, 10) > 50 ? [{ tipo: "erro", txt: "A redução é de até 50% da carga horária." }] : [];
+        const a = [{ tipo: "info", txt: "A jornada regular não pode ficar abaixo de 4 horas diárias ou 20 semanais (Portaria CG nº 306/2025, art. 2º, § 1º)." }];
+        if (/^Modifica/.test(v.pedido || "")) a.push({ tipo: "info", txt: "A modificação é pedida no mesmo processo SEI do pedido original, só com os documentos do novo tratamento (art. 7º, §§ 1º e 2º)." });
+        if (/^Renova/.test(v.pedido || "")) a.push({ tipo: "info", txt: "A renovação dispensa nova perícia, mas pede os documentos dos incisos I e II do art. 3º atualizados (art. 10, § 1º)." });
+        return a;
       }
+    }
+  },
+
+  /* Indenização por invalidez permanente: Lei nº 15.025/2013 e cartilha da DGP (atualizada em 16/08/2024) */
+  {
+    id: "indenizacao-invalidez",
+    titulo: "Indenização por invalidez permanente (acidente)",
+    categoria: "saude",
+    icone: "moeda",
+    opcao: "47",
+    resumo: "Indenização ao militar da ativa, da reserva remunerada ou reformado com invalidez permanente, total ou parcial, decorrente de acidente em serviço ou fora dele, comprovada por laudo médico-pericial da Junta Militar de Saúde (Lei estadual nº 15.025/2013).",
+    tags: ["indenizacao", "invalidez", "invalidez permanente", "acidente", "acidente em servico", "acidente fora de servico", "lei 15.025", "jms", "laudo pericial", "reformado", "reserva"],
+    quando: "Depois de acidente, em serviço ou fora dele, que tenha deixado invalidez permanente, total ou parcial. O pedido pode ser feito pelo próprio militar ou pelo seu representante legal.",
+    decide: "DGP (decide e publica em BGE), com homologação do Secretário de Administração",
+    destinatario: DEST.dgp,
+    decideBase: "Decreto nº 40.005/2013, art. 2º, I a IV; Lei nº 15.025/2013, art. 5º, § 1º; cartilha da DGP sobre indenização por invalidez permanente",
+    prazo: "Pagamento em até 120 dias da publicação, na imprensa oficial, da decisão homologatória",
+    passos: [
+      { t: "Confira os requisitos", d: "Ser militar da ativa, da reserva remunerada ou reformado; ter a invalidez permanente, total ou parcial, comprovada por laudo médico-pericial da Junta Militar de Saúde; e o acidente ter sido em serviço ou fora dele (Lei nº 15.025/2013, art. 1º; cartilha da DGP). Em serviço é o acidente com relação de causa e efeito direta com o exercício das funções; fora de serviço, sem essa relação. A invalidez é total quando impede a atividade-fim e qualquer outra atividade laborativa, e parcial quando impede a atividade-fim, mas não outra atividade (art. 1º, §§ 1º a 4º)." },
+      P.abrir(),
+      P.opcao("47", "“Indenização por invalidez permanente (Lei nº 15.025/2013)”, com a data e uma descrição objetiva do acidente — sem diagnóstico ou CID no texto."),
+      P.preencher(),
+      P.anexar(),
+      P.enviar(),
+      { t: "Inspeção na JMS e apuração", d: "Com o seu requerimento, a OME apresenta você à Junta Militar de Saúde, que emite o laudo médico-pericial, e o processo é instruído com o relatório final da sindicância (30 dias, prorrogáveis por igual período), do inquérito policial militar ou do auto de prisão em flagrante, e com outros documentos necessários; depois, segue à DGP por ofício (Decreto nº 40.005/2013, arts. 1º, parágrafo único, e 2º, I; cartilha da DGP, procedimentos 1 e 2)." },
+      { t: "Decisão, homologação e pagamento", d: "A DGP confere os documentos, decide e publica a decisão; em 5 dias, o processo vai à Secretaria de Administração, que em 15 dias, prorrogáveis por igual período, homologa ou não a decisão no Diário Oficial ou devolve o processo para diligências (Decreto nº 40.005/2013, art. 2º, II a IV). Homologada, a indenização é paga em até 120 dias da publicação, por ordem bancária em seu favor (Lei nº 15.025/2013, art. 5º; Decreto, arts. 1º e 5º); não homologada, o processo volta à OME para arquivamento (cartilha da DGP, procedimento 5)." }
+    ],
+    docs: [REQ("47"), "Cópia do RG Militar"],
+    atencao: [
+      "O pedido pode ser feito pelo militar acidentado ou pelo seu representante legal (Decreto nº 40.005/2013, art. 2º, I; cartilha da DGP, procedimento 1).",
+      "O pedido é indeferido quando ficar evidente a prescrição (Parecer PGE nº 023/2023; cartilha da DGP, observação 7).",
+      "A indenização não é devida em caso de exercício de atividade ilícita (Lei nº 15.025/2013, art. 4º, III).",
+      "Os valores estão no Anexo I da Lei nº 15.025/2013 e são reajustados todo ano pelo IPCA (art. 5º, § 3º).",
+      "Não escreva diagnóstico nem CID no texto do requerimento: quem comprova a invalidez é o laudo da JMS."
+    ],
+    base: ["Lei estadual nº 15.025/2013 (indenização por invalidez decorrente de acidente e por morte), arts. 1º, 4º e 5º, na redação da Lei nº 15.121/2013", "Lei estadual nº 15.121/2013 (altera a Lei nº 15.025/2013)", "Decreto estadual nº 40.005/2013 (regulamenta a Lei nº 15.025/2013), arts. 1º, 2º e 5º", "Lei estadual nº 15.204/2013 (casos de acidente em serviço dos militares do Estado)", "Parecer PGE nº 023/2023 (prescrição)", "Cartilha informativa da DGP — Indenização por invalidez permanente (atualizada em 16/08/2024)"],
+    relacionados: ["ltsp"],
+    minuta: {
+      campos: [
+        { id: "circunstancia", rotulo: "Acidente", tipo: "lista", opcoes: [["Em serviço", "em serviço"], ["Fora de serviço", "fora de serviço"]] },
+        { id: "acidente", rotulo: "Data do acidente", tipo: "data" },
+        { id: "descricao", rotulo: "Descrição objetiva do acidente (sem diagnóstico)", tipo: "area" }
+      ],
+      especificar: "Indenização por invalidez permanente decorrente de acidente {circunstancia}, ocorrido em {acidente}, nos termos da Lei estadual nº 15.025/2013",
+      extra: "Descrição do acidente: {descricao}",
+      amparo: "no art. 1º da Lei estadual nº 15.025/2013 e no Decreto estadual nº 40.005/2013"
     }
   },
 
@@ -1547,7 +1769,7 @@ const GUIAS = [
     resumo: "Inclusão ou exclusão de dependentes no Sistema de Saúde dos Militares do Estado de Pernambuco.",
     tags: ["sismepe", "plano de saude", "dependente", "incluir esposa", "incluir marido", "incluir filho", "excluir dependente", "assistencia medica", "hospital", "odontologico"],
     quando: "Depois de casamento, união estável, nascimento, adoção ou guarda — ou para excluir um dependente.",
-    decide: "Diretoria de Gestão de Pessoas, que faz a inclusão ou a exclusão no cadastro",
+    decide: "Diretoria de Gestão de Pessoal, que faz a inclusão ou a exclusão no cadastro",
     destinatario: DEST.dgp,
     decideBase: "Decreto nº 34.680/2010 (Regulamento do SISMEPE), arts. 9º e 10",
     prazo: "",
@@ -1585,7 +1807,7 @@ const GUIAS = [
     resumo: "Inclusão, exclusão ou correção de dependentes no cadastro funcional do SAD/RH, comprovando o vínculo e indicando o CPF de cada um.",
     tags: ["dependente", "dependentes", "sad", "sadrh", "sad/rh", "cadastro", "atualizacao cadastral", "incluir filho", "incluir esposa", "incluir marido", "cpf", "vinculo"],
     quando: "Depois de casamento, união estável, nascimento, adoção ou guarda — ou quando um dependente deixa de sê-lo ou tem dados a corrigir.",
-    decide: "Diretoria de Gestão de Pessoas (órgão de origem do cadastro)",
+    decide: "Diretoria de Gestão de Pessoal (órgão de origem do cadastro)",
     destinatario: DEST.dgp,
     decideBase: "Portaria Conjunta SAD/FUNAPE nº 36/2023, art. 7º, § 1º",
     prazo: "",
@@ -1612,6 +1834,73 @@ const GUIAS = [
     }
   },
 
+  /* Inclusão de dependente para dedução do IR: opção 26 do modelo de requerimento do SEI.
+     Quadro "Podem ser dependentes" e documentos por caso: textos enviados pelo usuário em 30/10/2026 (v1.17).
+     A norma do CBMPE sobre o pedido (competência e amparo legal) não foi localizada. */
+  {
+    id: "dependente-ir",
+    titulo: "Inclusão de dependente para dedução do imposto de renda (IR)",
+    categoria: "saude",
+    icone: "familia",
+    opcao: "26",
+    resumo: "Pedido de inclusão de dependente para dedução do imposto de renda, pela opção 26 do modelo de requerimento do SEI.",
+    tags: ["imposto de renda", "ir", "irpf", "deducao", "deducao do ir", "dependente", "dependentes", "incluir dependente", "incluir filho", "incluir esposa", "incluir marido", "enteado", "enteada", "companheiro", "companheira", "uniao estavel", "neto", "guarda judicial", "estudante"],
+    quando: "Quando você quer incluir dependente para dedução do imposto de renda — por exemplo, depois do nascimento ou da adoção de filho(a).",
+    decide: "Diretoria de Gestão de Pessoal",
+    destinatario: DEST.dgp,
+    decideBase: "Norma de competência não localizada; o modelo do SEI vem endereçado ao Diretor de Gestão de Pessoas",
+    aConfirmar: true,
+    prazo: "",
+    passos: [
+      P.abrir(),
+      P.opcao("26", "o nome e o vínculo de cada dependente."),
+      P.preencher(),
+      P.anexar(true),
+      P.enviar(),
+      P.acompanhar()
+    ],
+    docs: [
+      REQ("26"),
+      "Cópia do RG Militar",
+      "Cônjuge (certidão de casamento)",
+      "Companheiro/a (registro em cartório da união estável e/ou declaração de união estável)",
+      "Filho/a / enteado/a menor de idade (certidão de nascimento)",
+      "Filho/a / enteado/a inválido/a (certidão de nascimento e laudo médico particular)",
+      "Filho/a / enteado/a maior de 21 anos (até 24 anos) estudante de nível superior (certidão de nascimento e comprovante de matrícula)"
+    ],
+    quadros: [
+      {
+        titulo: "Podem ser dependentes",
+        cab: ["Nº", "Dependente"],
+        linhas: [
+          ["1", "Cônjuge, companheiro/a com quem o/a contribuinte tenha filho/a ou viva há mais de 5 anos, abrangendo também o/a companheiro/a de união homoafetiva"],
+          ["2", "Filho/a ou enteado/a, até 21 anos de idade; ou, em qualquer idade, quando incapacitado física ou mentalmente para o trabalho"],
+          ["3", "Filho/a ou enteado/a, se ainda estiver cursando estabelecimento de ensino superior ou escola técnica de segundo grau, até 24 anos de idade"],
+          ["4", "Filho/a ou enteado/a com deficiência, de qualquer idade, e capacitado/a para o trabalho, quando a sua remuneração não exceder a soma das deduções da base de cálculo"],
+          ["5", "Irmão/ã, neto/a ou bisneto/a, sem arrimo dos pais, de quem o/a contribuinte detenha a guarda judicial, com idade até 21 anos, ou em qualquer idade, quando incapacitado/a física ou mentalmente para o trabalho"],
+          ["6", "Irmão/ã, neto/a ou bisneto/a, sem arrimo dos pais, de quem o/a contribuinte detenha a guarda judicial, com idade até 24 anos, se ainda estiver cursando estabelecimento de ensino superior ou escola técnica de segundo grau, desde que o/a contribuinte tenha detido sua guarda judicial até os 21 anos"],
+          ["7", "Irmão/ã, neto/a ou bisneto/a com deficiência, sem arrimo dos pais, em qualquer idade, e capacitado/a para o trabalho, do/a qual o/a contribuinte detém a guarda judicial, quando a sua remuneração não exceder a soma das deduções da base de cálculo"],
+          ["8", "Pais, avós e bisavós que, no ano-calendário, tenham recebido rendimentos, tributáveis ou não, dentro do limite de isenção estabelecido pela Receita Federal"],
+          ["9", "Menor pobre até 21 anos que o contribuinte crie e eduque e de quem detenha a guarda judicial"],
+          ["10", "Pessoa absolutamente incapaz, da qual o/a contribuinte seja tutor/a ou curador/a"]
+        ]
+      }
+    ],
+    atencao: [
+      "A lista de documentos traz os casos de cônjuge, companheiro/a e filho/a ou enteado/a (menor de idade, inválido/a ou estudante de nível superior até 24 anos). Para os demais dependentes do quadro e para o amparo legal do item 3, confirme com a Seção de Pessoal: a norma do CBMPE sobre este pedido não foi localizada.",
+      "Para incluir o mesmo dependente também no SISMEPE (opção 25) ou no SAD/RH (opção 46), veja os guias desses assuntos: o modelo permite marcar mais de uma opção."
+    ],
+    base: ["Modelo de requerimento do SEI (CBMPE), opção 26 — Inclusão de dependente p/ dedução do IR"],
+    relacionados: ["dependentes-sadrh", "sismepe"],
+    minuta: {
+      campos: [
+        { id: "dependentes", rotulo: "Dependente(s): nome e vínculo", tipo: "area", ex: "Maria da Silva (cônjuge); João da Silva (filho)" }
+      ],
+      especificar: "Inclusão de dependente(s) para dedução do imposto de renda: {dependentes}",
+      amparo: "[dispositivo legal informado pela Seção de Pessoal]"
+    }
+  },
+
   /* ---------------- CARREIRA E INATIVIDADE ---------------- */
   {
     id: "reserva",
@@ -1628,7 +1917,7 @@ const GUIAS = [
     aConfirmar: true,
     prazo: "",
     passos: [
-      { t: "Confirme seu tempo com a DGP", d: "As exigências variam com a data de ingresso e a regra de transição, inclusive eventual pedágio. Peça a CTS e confirme o cumprimento do tempo antes de requerer." },
+      { t: "Confirme seu tempo com a DGP", d: "As exigências variam com a data de ingresso e a regra de transição, inclusive eventual pedágio. Para quem ingressou a partir de 1º/1/2022, a reserva a pedido exige 35 anos de serviço, com no mínimo 30 de atividade de natureza militar no Estado (Estatuto, art. 89, caput, na redação da LC nº 460/2021). Peça a CTS e confirme o cumprimento do tempo antes de requerer." },
       { t: "Veja antes se cabe a promoção requerida", d: "Ingressou no CBMPE até 31/12/2021? A promoção requerida só pode ser pedida junto com a reserva, no mesmo requerimento (modelo do Anexo C da Portaria CG nº 299/2025), e a transferência é feita já no novo posto ou graduação: nesse caso, use o guia da promoção requerida em vez deste. Veja também o guia do abono de permanência." },
       { t: "Regularize carga patrimonial e armamento", d: "Devolva o armamento e o material sob sua responsabilidade e solicite o Nada Consta da DLog." },
       { t: "Emita certidões e declarações", d: "Certidão negativa da Corregedoria Geral da SDS, declaração de bens e rendas atualizada e declaração de não acumulação ilícita de cargos." },
@@ -1640,8 +1929,13 @@ const GUIAS = [
       P.acompanhar("Continue no serviço ativo até a publicação do ato de transferência.")
     ],
     docs: [REQ("40"), "Cópia do RG Militar", "Certidão de Tempo de Serviço (CTS) expedida pela DGP", "Declaração de bens e rendas atualizada", "Declaração de não acumulação ilícita de cargos públicos", "Nada Consta da DLog (armamento e carga patrimonial)", "Certidão negativa de processos da Corregedoria Geral da SDS"],
-    atencao: ["Tem direito à promoção requerida? Não peça a reserva sozinha: a promoção só pode ser pedida junto com a reserva, no mesmo requerimento (Estatuto, art. 89-B). Use o guia da promoção requerida.", "Não se afaste do serviço antes da publicação do ato de transferência.", "As regras de inatividade mudaram com o Sistema de Proteção Social dos Militares: evite cálculos por conta própria e confirme com a DGP."],
-    base: ["Lei Complementar estadual nº 460/2021 (Sistema de Proteção Social dos Militares de PE)", "Lei estadual nº 6.783/1974 (Estatuto)", "Portaria do Comando Geral nº 299/2025 (reserva com promoção requerida)"],
+    atencao: [
+      "Tem direito à promoção requerida? Não peça a reserva sozinha: a promoção só pode ser pedida junto com a reserva, no mesmo requerimento (Estatuto, art. 89-B). Use o guia da promoção requerida.",
+      "Não é concedida a transferência a pedido a quem estiver respondendo a inquérito ou processo em qualquer jurisdição ou cumprindo pena de qualquer natureza; a regra vale para todos os militares, qualquer que seja a data de ingresso (Estatuto, art. 89, § 2º; Parecer PGE nº 345/2023).",
+      "Não se afaste do serviço antes da publicação do ato de transferência.",
+      "As regras de inatividade mudaram com o Sistema de Proteção Social dos Militares: evite cálculos por conta própria e confirme com a DGP."
+    ],
+    base: ["Lei Complementar estadual nº 460/2021 (Sistema de Proteção Social dos Militares de PE)", "Lei estadual nº 6.783/1974 (Estatuto), art. 89, caput e § 2º", "Parecer PGE nº 345/2023 (art. 89, § 2º, vale para todos os militares)", "Portaria do Comando Geral nº 299/2025 (reserva com promoção requerida)"],
     relacionados: ["promocao-requerida", "abono", "cts"],
     minuta: {
       campos: [
@@ -1706,21 +2000,24 @@ const GUIAS = [
     atencao: [
       "Peça as duas coisas juntas: a promoção requerida só pode ser pedida com a transferência para a reserva, no mesmo requerimento (Estatuto, art. 89-B; Portaria CG nº 299/2025, art. 10, parágrafo único). A transferência é feita já no novo posto ou graduação.",
       "Depois de protocolar, você não pode mais requerer o gozo de Licença Especial (art. 6º, § 1º; Parecer PGE nº 205/2022). Quer gozar a licença? Faça isso antes de pedir.",
+      "Já está em gozo de Licença Especial? Você pode protocolar a promoção requerida, mas a concessão da promoção implica, depois de 2 meses, a transferência para a inatividade, com a perda do restante da licença em curso (Parecer PGE nº 205/2022).",
       "Dá para desistir só até a publicação da promoção: publicada, ela é irrevogável por vontade do militar (Estatuto, art. 89-E; Parecer PGE nº 205/2022).",
       "A partir do recebimento do pedido pela Comissão de Promoção, você deixa de concorrer às promoções por antiguidade, merecimento e decenal (art. 5º, II).",
       "Transferência de ofício (art. 4º): sem direito adquirido (Estatuto, art. 74-AA), quem cumpre os requisitos é transferido de ofício ao passar de 2 anos no posto ou graduação (Coronel, Major QOA e Subtenente) ou de 4 anos no posto (Tenente-Coronel e Capitão QOA). O protocolo da promoção requerida com pelo menos 30 dias de antecedência afasta essa transferência.",
       "Coronel não tem promoção requerida (art. 8º): o caminho dele é a PCNH. O Tenente-Coronel promovido a Coronel por este critério não recebe a PCNH (Estatuto, art. 89-C, § 1º).",
       "Quem completou o tempo da reserva até 31/12/2021 não tem promoção requerida, e sim a promoção imediata (LC nº 59/2004, art. 21; Portaria CG nº 299/2025, art. 3º, § 2º).",
       "Respondendo a processo criminal ou a conselho (de Ética e Disciplina, de Justificação ou de Disciplina), a promoção depende de 2/3 dos votos da Comissão; condenado com trânsito em julgado, só depois de cumprida a pena e se não tiver sido transferido de ofício para a reserva (art. 6º, §§ 2º e 3º).",
+      "Não é concedida a transferência a pedido a quem estiver respondendo a inquérito ou processo em qualquer jurisdição ou cumprindo pena de qualquer natureza; a regra vale para todos os militares, qualquer que seja a data de ingresso (Estatuto, art. 89, § 2º; Parecer PGE nº 345/2023).",
       "Cada documento vai em PDF separado e autenticado no SEI; fotografia de documento não é aceita (arts. 19 e 20)."
     ],
     base: [
       "Lei estadual nº 6.783/1974 (Estatuto), arts. 89-A a 89-E e 90, XIV, na redação da LC nº 460/2021",
       "Lei Complementar estadual nº 470/2021 (promoção dos militares), arts. 13, 45 e 46",
       "Portaria do Comando Geral nº 299/2025 (BGE nº 138/2025), que revogou a Portaria CG nº 252/2023",
-      "Parecer PGE nº 205/2022 (Licença Especial depois do pedido) e Parecer PGE nº 615/2022 (transferência depois da promoção)"
+      "Parecer PGE nº 205/2022 (Licença Especial depois do pedido) e Parecer PGE nº 615/2022 (transferência depois da promoção)",
+      "Parecer PGE nº 345/2023 (art. 89, § 2º, do Estatuto vale para todos os militares)"
     ],
-    relacionados: ["reserva", "cts", "abono"],
+    relacionados: ["reserva", "cts", "abono", "pcnh"],
     minuta: {
       proprio: {
         titulo: "Requerimento (Anexo C da Portaria CG nº 299/2025)",
@@ -1764,6 +2061,71 @@ const GUIAS = [
     }
   },
 
+  /* PCNH: Portaria CG nº 254/2023 (BGE nº 177/2023); Estatuto, arts. 89-D, 89-E e 90, XV (LC nº 460/2021) */
+  {
+    id: "pcnh",
+    titulo: "Parcela Complementar de Nível Hierárquico (PCNH) — Coronel",
+    categoria: "carreira",
+    icone: "estrela",
+    opcao: "47",
+    resumo: "Para o Coronel da ativa que ingressou no CBMPE até 31/12/2021: cumpridas as condições para a inatividade, pede-se à DGP, por requerimento, a implantação da PCNH na remuneração. Depois de dois meses seguidos recebendo a parcela, o Coronel é desligado do serviço ativo.",
+    tags: ["pcnh", "parcela complementar", "nivel hierarquico", "coronel", "reserva", "inatividade", "ultimo posto", "compulsoria", "portaria 254", "aposentadoria"],
+    quando: "Quando o Coronel da ativa que ingressou até 31/12/2021 cumpre as condições para a inatividade (Portaria CG nº 254/2023, art. 4º, § 1º). Perto da transferência compulsória, até 30 dias antes da data em que completaria as condições dela (art. 4º, § 3º).",
+    decide: "Diretoria de Gestão de Pessoal (DGP)",
+    destinatario: DEST.dgp,
+    decideBase: "Portaria CG nº 254/2023, arts. 6º, I, e 8º, IV",
+    prazo: "Perto da compulsória, até 30 dias antes da data em que se completariam as condições dela",
+    passos: [
+      { t: "Confira se você tem direito", d: "Ser Coronel da ativa, ter ingressado no CBMPE até 31/12/2021 sem ter completado, até essa data, o tempo mínimo para a reserva, e cumprir os dois requisitos do art. 4º da Portaria CG nº 254/2023: I – o tempo de serviço que faltava em 1º/1/2022 para 30 anos (homem) ou 25 anos (mulher), acrescido de 17%; II – no mínimo 25 anos de atividade de natureza militar no Estado, mais 4 meses a cada ano de serviço que faltava em 1º/1/2022 para aqueles 30 ou 25 anos (calculado em dias e limitado a 5 anos de acréscimo)." },
+      { t: "Quer gozar a Licença Especial?", d: "A Licença Especial tem de ser concedida antes do requerimento da PCNH (cartilha da DGP sobre a PCNH, obs. 7)." },
+      { t: "Tenha a certidão de tempo da DGP", d: "O processo leva a certidão ou declaração de tempo de serviço emitida pela DGP (art. 6º, VI). Você pode requerer a contagem do tempo, na OME, a qualquer momento (art. 11) — veja o guia da CTS." },
+      { t: "Escolha o momento de protocolar", d: "Cumpridas as condições para a inatividade, protocole o requerimento (art. 4º, § 1º). Perto da transferência compulsória, protocole até 30 dias antes da data em que completaria as condições dela: é o que afasta a transferência de ofício (art. 4º, §§ 2º e 3º). Em cargo comissionado (CAA), cargo em comissão (DAS até DAS-5) ou função gratificada (FDA a FDA-3), a DGP orienta requerer na data da efetiva exoneração (cartilha da DGP, obs. 3)." },
+      { t: "Preencha os anexos da Portaria", d: "Termo de Transferência para Inatividade (Anexo I) e declaração de endereço à FUNAPE, com o CEP registrado nos Correios (Anexo II): cada um em uma via assinada digitalmente e outra, em PDF, assinada a próprio punho. Declaração atualizada de dependentes previdenciários (Anexo III) (art. 6º, III a V). Os modelos estão na própria Portaria CG nº 254/2023 (no SEI, doc. nº 40399835)." },
+      P.abrir(),
+      P.opcao("47", "“Implantação da Parcela Complementar de Nível Hierárquico (PCNH)”, com a data em que você cumpriu as condições para a inatividade."),
+      P.preencher(),
+      P.anexar(),
+      P.enviar(),
+      { t: "Na OME e na DGP", d: "A OME confere e junta os documentos, providencia junto à DGP o gozo das férias, se necessário, e envia o processo à DGP (art. 7º). A DGP confere a certidão de tempo e, deferido o pedido, manda implantar a PCNH, envia o processo à DIP para a transferência à inatividade perante a FUNAPE e prepara a portaria de desligamento depois de dois meses seguidos de recebimento da parcela (art. 8º)." }
+    ],
+    docs: [
+      REQ("47"),
+      "Cópia do RG Militar",
+      "Termo de Transferência para Inatividade (Anexo I): uma via assinada digitalmente e outra, em PDF, assinada a próprio punho",
+      "Declaração de endereço à FUNAPE, com o CEP dos Correios (Anexo II): uma via assinada digitalmente e outra, em PDF, assinada a próprio punho",
+      "Declaração atualizada de dependentes previdenciários (Anexo III)",
+      "Certidão ou declaração de tempo de serviço emitida pela DGP"
+    ],
+    ome: ["Publicação da concessão do abono de permanência, se houver", "Conferência e juntada dos documentos e, se necessário, providência do gozo das férias junto à DGP (art. 7º)"],
+    atencao: [
+      "O Tenente-Coronel promovido a Coronel pela promoção requerida (Estatuto, art. 89-C) não tem direito à PCNH (Portaria CG nº 254/2023, art. 5º, § 1º).",
+      "Depois de dois meses seguidos recebendo a PCNH, você é desligado do serviço ativo, e não cabe desistência depois da implantação nos vencimentos (art. 5º, §§ 2º e 3º).",
+      "Cada documento vai em PDF separado e certificado no SEI; fotografia de documento não é aceita (art. 3º)."
+    ],
+    base: [
+      "Lei estadual nº 6.783/1974 (Estatuto), arts. 89-D, 89-E e 90, XV (redação da LC nº 460/2021)",
+      "Lei Complementar estadual nº 59/2004, art. 21, § 1º, e Lei Complementar estadual nº 351/2017, art. 5º (PCNH)",
+      "Portaria do Comando Geral nº 254/2023 (BGE nº 177/2023)",
+      "Parecer PGE nº 615/2022 (transferência para a reserva depois da PCNH: Estatuto, art. 90, XV)",
+      "Pareceres PGE nº 205/2022 e nº 407/2023 (citados na cartilha da DGP; o nº 407/2023 também na Portaria CG nº 254/2023)",
+      "Cartilha informativa da DGP — PCNH"
+    ],
+    relacionados: ["promocao-requerida", "cts", "lesp", "abono"],
+    minuta: {
+      campos: [
+        { id: "data", rotulo: "Data em que cumpriu as condições para a inatividade", tipo: "data" }
+      ],
+      especificar: "Implantação da Parcela Complementar de Nível Hierárquico (PCNH) na remuneração, na condição de Coronel da ativa que ingressou na Corporação até 31/12/2021, por ter cumprido em {data} as condições para a transferência para a inatividade",
+      amparo: "no art. 21, § 1º, da Lei Complementar estadual nº 59/2004 e no art. 4º, § 1º, da Portaria do Comando Geral nº 254/2023",
+      avisos: function (v, u, d) {
+        const posto = String((d && d.posto) || "").toLowerCase();
+        const coronel = /coronel|\bcel\b/.test(posto) && !/tenente|\bten\b|\btc\b/.test(posto);
+        if (posto && !coronel) return [{ tipo: "alerta", txt: "A PCNH é do Coronel da ativa (Portaria CG nº 254/2023, art. 4º, § 1º). Para os demais postos e graduações, veja a promoção requerida." }];
+        return [];
+      }
+    }
+  },
+
   {
     id: "abono",
     titulo: "Abono de permanência",
@@ -1773,14 +2135,15 @@ const GUIAS = [
     resumo: "Valor equivalente à contribuição previdenciária mensal, pago a quem já cumpre os requisitos para a reserva voluntária e opta por continuar na ativa.",
     tags: ["abono", "abono de permanencia", "almofada", "continuar na ativa", "permanecer", "contribuicao previdenciaria"],
     quando: "Ao completar os requisitos para a reserva voluntária, se você decidir permanecer em serviço.",
-    decide: "Diretoria de Gestão de Pessoas (concessão junto à DDir/DGP)",
+    decide: "Diretoria de Gestão de Pessoal (concessão junto à DDir/DGP)",
     destinatario: DEST.dgp,
     decideBase: "Portaria CG nº 187/2021: concessão do abono junto à DDir/DGP",
     prazo: "Efeitos financeiros retroagem à data em que os requisitos foram preenchidos",
     passos: [
-      { t: "Confirme que já cumpre os requisitos", d: "O abono pressupõe todos os requisitos para a reserva voluntária preenchidos." },
+      { t: "Confirme que já cumpre os requisitos", d: "O abono pressupõe os requisitos para a reserva voluntária preenchidos: os do art. 89 do Estatuto, para quem ingressou a partir de 1º/1/2022, ou os do art. 89-A (tempo mais pedágio) (cartilha da DGP sobre abono de permanência)." },
       { t: "Separe o último contracheque", d: "Ele comprova o desconto previdenciário que o abono compensa." },
       { t: "Confira as certidões de tempo", d: "Se houver tempo de fora do CBMPE, anexe a CTC, a certidão de aluno-aprendiz ou o certificado de reservista. Nome, CPF, filiação, nascimento, identidade e matrícula devem bater com o RG funcional; com erro, o processo volta à OME (Portaria CG nº 187/2021, art. 1º)." },
+      { t: "Informe o tempo externo", d: "No requerimento, especifique se existe tempo de contribuição previdenciária de fora do CBMPE. Ele só é contado se estiver averbado na pasta de assentamentos: se ainda não estiver, peça antes a averbação (cartilha da DGP sobre abono de permanência, obs. 2 e 3)." },
       { t: "Assine a declaração de opção", d: "Declaração formal de que você opta por permanecer no serviço ativo." },
       P.abrir(),
       P.opcao("07", "a data em que completou os requisitos e a opção pela permanência."),
@@ -1793,17 +2156,23 @@ const GUIAS = [
     ome: ["Ofício de encaminhamento assinado pelo Comandante do 7º GB", "Mapa de tempo de serviço extraído dos registros da OME"],
     atencao: [
       "O abono não é requisito da promoção requerida. Se você o recebe e depois pedir a promoção, a OME junta a publicação da concessão ao processo (Portaria CG nº 299/2025, art. 11, I, b).",
+      "Vai pedir também a promoção requerida? A DGP orienta requerer o abono antes do requerimento da promoção requerida (cartilha da DGP sobre abono de permanência, obs. 4).",
       "O RG Militar e cada certidão vão em PDF separado, legível e autenticado no SEI (Portaria CG nº 187/2021, art. 1º, § 5º).",
       "Certidão com dado diferente do RG funcional faz o processo voltar à OME: confira antes de enviar (art. 1º, § 4º)."
     ],
-    base: ["Constituição Federal, art. 40, § 19 (redação da EC nº 103/2019)", "Lei estadual nº 6.783/1974 (Estatuto), art. 74-AC", "Lei Complementar estadual nº 56/2003, art. 2º", "Portaria do Comando Geral nº 187/2021 (BGE nº 147/2021), art. 1º"],
-    relacionados: ["promocao-requerida", "reserva", "cts"],
+    base: ["Constituição Federal, art. 40, § 19 (redação da EC nº 103/2019)", "Lei estadual nº 6.783/1974 (Estatuto), arts. 74-AC, 89 e 89-A", "Lei Complementar estadual nº 56/2003, art. 2º", "Portaria do Comando Geral nº 187/2021 (BGE nº 147/2021), art. 1º", "Cartilha informativa da DGP — Abono de Permanência (atualizada em 24/05/2024)"],
+    relacionados: ["promocao-requerida", "reserva", "cts", "averbacao"],
     minuta: {
       campos: [
-        { id: "data", rotulo: "Data em que completou os requisitos", tipo: "data" }
+        { id: "data", rotulo: "Data em que completou os requisitos", tipo: "data" },
+        { id: "externo", rotulo: "Tempo de contribuição previdenciária fora do CBMPE", tipo: "lista", opcoes: [["Não possui", "Declara não possuir tempo de contribuição previdenciária externo ao CBMPE"], ["Possui, averbado nos assentamentos", "Declara possuir tempo de contribuição previdenciária externo ao CBMPE, averbado nos assentamentos"], ["Possui, ainda não averbado", "Declara possuir tempo de contribuição previdenciária externo ao CBMPE, ainda não averbado nos assentamentos"]] }
       ],
       especificar: "Concessão do abono de permanência, por ter preenchido em {data} os requisitos para a transferência voluntária para a reserva remunerada, com opção expressa pela permanência no serviço ativo",
-      amparo: "no art. 74-AC da Lei estadual nº 6.783/1974, no art. 2º da Lei Complementar estadual nº 56/2003 e na Portaria do Comando Geral nº 187/2021"
+      extra: "{externo}",
+      amparo: "no art. 74-AC da Lei estadual nº 6.783/1974, no art. 2º da Lei Complementar estadual nº 56/2003 e na Portaria do Comando Geral nº 187/2021",
+      avisos: function (v) {
+        return /ainda não averbado/.test(v.externo || "") ? [{ tipo: "alerta", txt: "O tempo de fora do CBMPE só é contado se estiver averbado nos assentamentos (cartilha da DGP sobre abono de permanência, obs. 3): peça a averbação." }] : [];
+      }
     }
   },
 
@@ -1834,9 +2203,10 @@ const GUIAS = [
     atencao: [
       "A posse deve ser comunicada pelo SEI ao Comandante da OME em que você está lotado, com a publicação ou o comprovante da posse (Portaria CG nº 221/2022, art. 3º, § 3º).",
       "É vedada a acumulação com qualquer cargo de natureza privada (art. 3º, § 4º).",
-      "O comandante não ajusta a escala para tornar os horários compatíveis nem para impedir a acumulação (art. 4º)."
+      "O comandante não ajusta a escala para tornar os horários compatíveis nem para impedir a acumulação (art. 4º).",
+      "A atividade militar prevalece: você deve estar sempre à disposição do CBMPE para atender às demandas da corporação (cartilha da DGP sobre acumulação, obs. 3)."
     ],
-    base: ["Constituição Federal, art. 42, § 3º, c/c art. 37, XVI (EC nº 101/2019)", "Portaria do Comando Geral nº 221/2022 (BGE nº 222/2022), arts. 3º a 5º", "Decreto estadual nº 38.540/2012 (apuração pela SAD/CACEF)", "Parecer PGE nº 0554/2019"],
+    base: ["Constituição Federal, art. 42, § 3º, c/c art. 37, XVI (EC nº 101/2019)", "Portaria do Comando Geral nº 221/2022 (BGE nº 222/2022), arts. 3º a 5º", "Decreto estadual nº 38.540/2012 (apuração pela SAD/CACEF)", "Parecer PGE nº 0554/2019", "Cartilha informativa da DGP — Acumulação de cargos (atualizada em 26/09/2024)"],
     relacionados: [],
     minuta: {
       campos: [
@@ -1851,6 +2221,104 @@ const GUIAS = [
     }
   },
 
+  /* Movimentação a pedido: Portaria CG nº 303/2025 (BGE nº 155/2025), com o requerimento do Anexo B;
+     Decreto estadual nº 7.510/1981 (Regulamento de Movimentação), arts. 20, 22, 25 e 47 */
+  {
+    id: "movimentacao",
+    titulo: "Movimentação a pedido para outra OME",
+    categoria: "carreira",
+    icone: "predio",
+    opcao: "Anexo",
+    opcaoRotulo: "Anexo B da Portaria CG nº 303/2025",
+    resumo: "Pedido de movimentação para outra OME por interesse próprio, individual ou por permuta. O requerimento é o do Anexo B da Portaria CG nº 303/2025, com até 3 opções de lotação; sem atendimento imediato, o pedido passa a integrar o Cadastro de Intenção de Movimentação (CIM).",
+    tags: ["movimentacao", "movimentar", "transferencia", "transferencia de ome", "mudar de unidade", "mudar de ome", "outra ome", "a pedido", "interesse proprio", "permuta", "cim", "cadastro de intencao de movimentacao", "cmms", "motivo de saude", "conjuge", "portaria 303", "anexo b", "lotacao"],
+    quando: "Quando você quer servir em outra OME por interesse próprio, depois de 1 ano, no mínimo, de permanência no órgão de origem — salvo necessidade de saúde sua ou de dependente (Decreto nº 7.510/1981, art. 25, I).",
+    decide: "Comandante-Geral, no Suplemento de Pessoal, depois da análise da DGP e, no motivo de saúde, do parecer da CMMS-BM",
+    destinatarioRotulo: "Requerimento do Anexo B, pela cadeia de comando até a DGP",
+    decideBase: "Portaria CG nº 303/2025, arts. 5º, 7º, 8º e 17; Decreto nº 7.510/1981, art. 25",
+    prazo: "Pedido a qualquer tempo; inscrição simplificada no CIM de 1º de janeiro a 31 de março de cada ano",
+    passos: [
+      { t: "Confira as condições", d: "Para a movimentação por interesse próprio: 1 ano, no mínimo, de permanência no órgão de origem, salvo necessidade de saúde sua ou de dependente; estar, no mínimo, no bom comportamento; não estar respondendo a processo de qualquer espécie; e haver claro no órgão de destino (Decreto nº 7.510/1981, art. 25, I a IV; Portaria CG nº 303/2025, art. 2º, II)." },
+      { t: "Escolha até 3 OMEs", d: "Indique até 3 opções de lotação do seu interesse (Portaria CG nº 303/2025, art. 10, III)." },
+      { t: "Separe os comprovantes do motivo", d: "Junte os documentos que comprovem o motivo do pedido: veja no quadro abaixo o que anexar em cada caso (art. 10, II e §§ 1º a 4º)." },
+      { t: "Monte o requerimento do Anexo B", d: "No modelo do Anexo B da Portaria CG nº 303/2025 (no SEI, doc. nº 63563891): seus dados, a OME atual, as opções de OME, a exposição de motivos, a comprovação e a declaração dos requisitos do art. 25 do Decreto nº 7.510/1981 — data de praça, comportamento, estado civil, número de dependentes, se responde a processo e as últimas movimentações (art. 10, I a V). O gerador abaixo monta o texto." },
+      { t: "Permuta? Veja a ficha do Anexo D", d: "Na permuta, os interessados podem fazer requerimento conjunto, com a anuência dos comandantes nos autos, ou preencher, junto à OME, a ficha de movimentação por permuta do Anexo D, assinada pelos dois titulares das OMEs e autorizada pelo Diretor (art. 12 e Anexo A)." },
+      { t: "Monte o processo no SEI", d: "Inicie o processo com o tipo correspondente ao assunto, inclua o requerimento, cole o texto e inclua cada comprovante em PDF. Na dúvida sobre o tipo de processo, consulte a " + CONFIG.seiPessoal + "." },
+      P.enviar(),
+      { t: "Na OME e na DGP", d: "O Comandante instrui o processo com o ofício do Anexo C, com as informações funcionais do art. 4º, e o encaminha com opinativo pela cadeia de comando até a DGP; a movimentação por interesse próprio depende da anuência prévia dos comandantes das OMEs envolvidas (arts. 4º, 5º e 11). No motivo de saúde, a DGP envia o processo à Comissão de Movimentações por Motivo de Saúde de Bombeiros Militares (CMMS-BM), que dá parecer em ata (arts. 7º, § 2º, 16 e 17). A decisão é do Comandante-Geral, no Suplemento de Pessoal (art. 8º)." },
+      { t: "Sem atendimento imediato: CIM", d: "Se o pedido não puder ser atendido de imediato, os seus dados passam a integrar o Cadastro de Intenção de Movimentação (CIM), da DGP, classificados por antiguidade e tempo de serviço (arts. 3º, § 3º, V, e 10, IV). Você pode pedir a retirada a qualquer tempo, por requerimento ao Diretor de Gestão de Pessoal (art. 3º, § 1º)." },
+      { t: "Movimentado: apresente-se", d: "Publicado o Suplemento de Pessoal, apresente-se presencialmente na OME de destino nos prazos do Decreto nº 7.510/1981; se algo impedir a apresentação, informe a DGP (art. 8º). Veja o guia do trânsito." }
+    ],
+    docs: [
+      "Requerimento (Anexo B da Portaria CG nº 303/2025), assinado no SEI",
+      "Documentos que comprovem o motivo do pedido (veja o quadro)"
+    ],
+    quadros: [{
+      titulo: "O que anexar, conforme o motivo (Portaria CG nº 303/2025, art. 10, §§ 1º a 4º)",
+      cab: ["Motivo do pedido", "O que anexar ao requerimento"],
+      linhas: [
+        ["Domicílio", "Comprovante de residência"],
+        ["Habilitação técnica, para unidade com serviço especializado", "Comprovação da habilitação técnica: portaria de conclusão de curso, diploma ou certificado de conclusão de curso, por exemplo"],
+        ["Servir no mesmo município ou região metropolitana em que o cônjuge trabalha", "Certidão de casamento ou de união estável e documento oficial do órgão ou setor do cônjuge, com a função dele e o endereço do local de trabalho"],
+        ["Cuidados com a saúde própria ou de pessoa da família", "Ata de Inspeção de Saúde ou pareceres médicos e de outros especialistas, certidões ou outros documentos que justifiquem o pedido; o processo segue à CMMS-BM"]
+      ],
+      nota: "Necessidade peculiar de saúde é todo acometimento de saúde seu ou do seu familiar que exija acompanhamento contínuo, por prazo indeterminado, de profissionais de saúde e acesso a serviços médicos específicos (art. 16, parágrafo único)."
+    }],
+    ome: ["Ofício do Anexo C da Portaria CG nº 303/2025, com as informações funcionais do art. 4º: afastamentos para tratamento de saúde nos últimos 2 anos, restrições para tratamento de saúde, readaptação, jornada especial, afastamentos das funções e punições disciplinares nos últimos 5 anos", "opinativo do Comandante e anuência prévia dos comandantes das OMEs envolvidas (arts. 5º e 11)"],
+    atencao: [
+      "O prazo mínimo de 1 ano no órgão pode ser reduzido, entre outros casos, por imposição de saúde sua ou de dependente, comprovada em inspeção de saúde ou parecer médico, e na conclusão de Licença Especial, LTIP ou LTSPF (Decreto nº 7.510/1981, art. 20, § 2º, d e g).",
+      "Todo ano, de 1º de janeiro a 31 de março, você pode pedir a inclusão no CIM de forma simplificada: o Comandante encaminha direto ao Diretor de Gestão de Pessoal, sem os comprovantes e opinativos dos arts. 4º e 5º (Portaria CG nº 303/2025, art. 3º, I).",
+      "Readaptado, promovido pela promoção requerida ou afastado das funções: o opinativo sobre a movimentação é exclusivo do Diretor de Gestão de Pessoal (art. 6º).",
+      "Gestante ou lactante: você pode pedir movimentação para unidade cuja localidade permita melhor assistência à sua saúde ou ao lactente, concedida de acordo com a disponibilidade da administração; para isso, a gestação e a lactação equiparam-se a motivo de saúde (Portaria CG nº 310/2025, art. 7º, §§ 1º e 2º).",
+      "As despesas da movimentação por interesse próprio correm inteiramente por sua conta (Decreto nº 7.510/1981, art. 47, parágrafo único).",
+      "Transferido, você só volta à OME de origem depois de 1 ano, no mínimo (Decreto nº 7.510/1981, art. 22)."
+    ],
+    base: [
+      "Portaria do Comando Geral nº 303/2025 (BGE nº 155/2025), arts. 2º a 12 e 15 a 22, e Anexos A a D",
+      "Decreto estadual nº 7.510/1981 (Regulamento de Movimentação), arts. 20, 22, 25 e 47",
+      "Portaria do Comando Geral nº 310/2025, art. 7º (gestante e lactante)"
+    ],
+    relacionados: ["transito"],
+    minuta: {
+      proprio: {
+        titulo: "Requerimento (Anexo B da Portaria CG nº 303/2025)",
+        modelo: "Anexo B da Portaria CG nº 303/2025",
+        sub: "Preencha os campos: o texto sai no modelo do Anexo B da Portaria CG nº 303/2025, pronto para colar no SEI.",
+        legenda: "Dados do pedido",
+        dados: ["nome", "rg", "posto", "ome", "matricula", "fone", "endereco"],
+        trechoSei: "ESPECIFICAR: Movimentação para outra OME",
+        blocos: [
+          { tipo: "p", txt: "ESPECIFICAR: Movimentação para outra OME" },
+          { tipo: "linhas", txt: ["1. Nome: {nome} RG: {rg};", "Posto/Grad/: {posto} OME.: {ome} Mat: {matricula}", "Fone: {fone};", "Endereço: {endereco};"] },
+          { tipo: "p", txt: "2. Requer a V.Sa., que se digne em conceder-lhe a movimentação para outra OME atendendo às especificações e motivações abaixo:" },
+          { tipo: "linhas", txt: ["2.1 OME atual: {ome}", "2.2 Opções de escolha de OME:", "1. OME 1: {op1}", "2. OME 2: [[{op2}]]", "3. OME 3: [[{op3}]]"] },
+          { tipo: "p", txt: "2.3 Exposição de motivos de movimentação: {motivos}" },
+          { tipo: "p", txt: "2.4 Comprovação da exposição de motivos: [[{comprovacao}]]" },
+          { tipo: "p", txt: "3. Tal solicitação encontra amparo legal no art. 25 do Decreto Estadual nº 7.510 de 1981." },
+          { tipo: "p", txt: "4.Declaro estar ciente que na impossibilidade de atendimento imediato do pleito, os dados deste requerimento estarão integrados no Cadastro de Intenção de Movimentação (CIM). Declaro, ainda, que este requerente atende a todos os requisitos do art. 25 do Decreto Estadual nº 7.510 de 1981:" },
+          { tipo: "linhas", txt: ["1. Data de praça: {praca}", "2. Comportamento: {comportamento}", "3. Estado Civil: {civil}", "4. Número de dependentes: {dependentes}", "5. Se está ou não respondendo a processo de qualquer espécie (se sim, especificar): {processo}", "6. Últimas movimentações: {ultimas}"] },
+          { tipo: "p", txt: "5. É a {vez} vez que requer." },
+          { tipo: "fecho", txt: ["Nestes termos,", "Pede deferimento."] },
+          { tipo: "local" },
+          { tipo: "assin", txt: "{nome} - {posto}", sub: "Requerente" }
+        ]
+      },
+      campos: [
+        { id: "op1", rotulo: "OME 1", tipo: "texto" },
+        { id: "op2", rotulo: "OME 2", tipo: "texto", opcional: true },
+        { id: "op3", rotulo: "OME 3", tipo: "texto", opcional: true },
+        { id: "motivos", rotulo: "Exposição de motivos de movimentação", tipo: "area", ex: "Descreva qual o motivo da movimentação para outra OME" },
+        { id: "comprovacao", rotulo: "Comprovação da exposição de motivos (documentos anexados)", tipo: "area", opcional: true, ex: "Ex.: comprovante de residência" },
+        { id: "praca", rotulo: "Data de praça", tipo: "data" },
+        { id: "comportamento", rotulo: "Comportamento", tipo: "texto" },
+        { id: "civil", rotulo: "Estado civil", tipo: "texto" },
+        { id: "dependentes", rotulo: "Número de dependentes", tipo: "numero", min: 0 },
+        { id: "processo", rotulo: "Se está ou não respondendo a processo de qualquer espécie (se sim, especificar)", tipo: "texto", largo: true },
+        { id: "ultimas", rotulo: "Últimas movimentações", tipo: "area" }
+      ]
+    }
+  },
+
   /* ---------------- TEMPO DE SERVIÇO E CERTIDÕES ---------------- */
   {
     id: "cts",
@@ -1861,7 +2329,7 @@ const GUIAS = [
     resumo: "Documento expedido pela DGP com todo o seu tempo de serviço — anos, meses e dias — e os períodos averbados.",
     tags: ["cts", "certidao", "tempo de servico", "contagem de tempo", "anuenio", "inss", "certidao de tempo", "quanto tempo tenho"],
     quando: "Para reserva, promoção requerida, abono, aposentadoria em outro regime, apuração de anuênios e outras finalidades.",
-    decide: "Diretoria de Gestão de Pessoas (emite a certidão)",
+    decide: "Diretoria de Gestão de Pessoal (emite a certidão)",
     destinatario: DEST.dgp,
     decideBase: "Portaria CG nº 227/2022, art. 15, § 2º",
     prazo: "",
@@ -1897,7 +2365,7 @@ const GUIAS = [
     resumo: "Registro, nos seus assentamentos, do tempo de contribuição anterior ao ingresso no CBMPE — no INSS ou em outro órgão público.",
     tags: ["averbacao", "averbar", "tempo de inss", "tempo anterior", "emprego anterior", "ctc", "contagem reciproca", "aluno aprendiz", "tempo publico", "carteira assinada"],
     quando: "Quando você trabalhou com contribuição previdenciária antes de ingressar no CBMPE.",
-    decide: "Diretor de Gestão de Pessoas",
+    decide: "Diretor de Gestão de Pessoal",
     destinatario: DEST.dgp,
     decideBase: "Na PMPE, a DGP processa as averbações; ato do CBMPE não localizado",
     aConfirmar: true,
@@ -1936,7 +2404,7 @@ const GUIAS = [
     resumo: "Retirada de tempo averbado anteriormente, para aproveitá-lo em outro regime previdenciário.",
     tags: ["desaverbar", "desaverbacao", "retirar tempo", "outro regime", "inss", "aposentadoria em outro regime"],
     quando: "Quando o tempo averbado no CBMPE é necessário para contagem em outro regime previdenciário.",
-    decide: "Diretor de Gestão de Pessoas",
+    decide: "Diretor de Gestão de Pessoal",
     destinatario: DEST.dgp,
     decideBase: "Na PMPE, a DGP processa as desaverbações; ato do CBMPE não localizado",
     aConfirmar: true,
@@ -1989,8 +2457,8 @@ const GUIAS = [
       { t: "Abra o processo e envie", d: "No SEI, inclua o Anexo C e os comprovantes e envie pela via hierárquica ao Comandante do 7º GB." },
       { t: "Aguarde a autorização", d: "Uso permitido: o Comandante do 7º GB decide no próprio Anexo C e publica em BGE reservado. Uso restrito: o CBMPE dá parecer e o SFPC/7ª RM autoriza. A autorização vale 180 dias." },
       { t: "Compre direto com a loja", d: "Negocie com o fornecedor e apresente a autorização, a identidade funcional e o comprovante da GRU (Portaria CG nº 189/2021, art. 16). A arma fica na loja até o CRAF sair (art. 16, § 7º)." },
-      { t: "Peça o registro com a nota fiscal", d: "Inclua no processo a nota fiscal, a ficha para cadastro no SIGMA (com fornecedor, CNPJ e nº da NF), o Formulário nº 01 e o requerimento de emissão de CRAF. O 7º GB publica o pedido de registro em BGE reservado e junta a cópia; a DLog registra a arma e solicita o cadastro ao SFPC/7ª RM (art. 20)." },
-      { t: "Retire a arma com o CRAF", d: "Com o número SIGMA, a DLog expede o CRAF. Apresente-o na loja para receber a arma; quando for o caso, a loja a entrega com a guia de tráfego que ela emite. Se o cadastro for negado, o distrato da compra fica entre você e o fornecedor." }
+      { t: "Peça o registro com a nota fiscal", d: "Inclua no processo a nota fiscal, a ficha para cadastro no SIGMA (com fornecedor, CNPJ e nº da NF), o Formulário nº 01 e o requerimento de emissão de CRAF. O 7º GB publica o pedido de registro em BGE reservado e junta a cópia (art. 20, I)." },
+      { t: "Retire a arma com o CRAF", d: "Aguarde a DLog registrar a arma e expedir o CRAF (art. 20, II e III). Apresente-o na loja para receber a arma; quando for o caso, a loja a entrega com a guia de tráfego que ela emite. Se o cadastro for negado, o distrato da compra fica entre você e o fornecedor." }
     ],
     quadros: [{
       titulo: "Uso permitido × uso restrito",
@@ -2105,8 +2573,8 @@ const GUIAS = [
       P.opcao("39", "“Transferência SINARM → SIGMA”, com marca, modelo, calibre, número de série e nº SINARM da arma."),
       P.preencher(),
       P.anexar(),
-      { t: "Envie pela via hierárquica", d: "O Comandante do 7º GB despacha no próprio Anexo J e remete o processo à DLog, que pede o cadastro no SIGMA ao SFPC/7ª RM (Portaria CG nº 189/2021, arts. 21 e 23)." },
-      { t: "Publicação e novo CRAF", d: "O deferimento sai em BGE reservado e a DLog emite o novo CRAF. Só então a arma pode ser entregue. Depois, o vendedor registra o apostilamento no site da Polícia Federal." }
+      { t: "Envie pela via hierárquica", d: "O Comandante do 7º GB despacha no próprio Anexo J e remete o processo à DLog (Portaria CG nº 189/2021, arts. 21 e 23)." },
+      { t: "Aguarde o novo CRAF", d: "Aguarde a DLog pedir o cadastro no SIGMA, publicar o deferimento e emitir o novo CRAF (Portaria CG nº 189/2021, art. 23, III a V). Só então a arma pode ser entregue. Depois, o vendedor registra o apostilamento no site da Polícia Federal." }
     ],
     formularios: ["anexo-j", "ficha-sigma"],
     docs: [REQ("39"), "Anexo J — requerimento de transferência SINARM → SIGMA, assinado pelas duas partes", "Autorização da Polícia Federal para a transferência (anuência do SINARM)", "Ficha para cadastro de arma de fogo no SIGMA", "GRU da taxa de aquisição de PCE e comprovante de pagamento", "Cópia da identidade do comprador e do vendedor", "Cópia do CRAF da arma (SINARM)", "Comprovante de residência do comprador", "Certidão da Corregedoria Geral da SDS/PE (comprador)"],
@@ -2150,8 +2618,8 @@ const GUIAS = [
       P.opcao("39", "“Transferência SIGMA → SIGMA”, com os dados da arma (nº SIGMA e série) e do vendedor."),
       P.preencher(),
       P.anexar(),
-      { t: "Envie pela via hierárquica", d: "O Comandante do 7º GB despacha no próprio Anexo I (Portaria CG nº 189/2021, art. 24) e a DLog encaminha ao SFPC/7ª RM, que defere e atualiza o SIGMA (Anexo I, itens 6 e 7)." },
-      { t: "Publicação e novo CRAF", d: "A DLog publica o deferimento em BGE reservado e emite o novo CRAF. A arma só muda de mãos depois disso." }
+      { t: "Envie pela via hierárquica", d: "O Comandante do 7º GB despacha no próprio Anexo I (Portaria CG nº 189/2021, art. 24) e remete o processo à DLog." },
+      { t: "Aguarde o novo CRAF", d: "Aguarde a DLog levar o pedido ao SFPC/7ª RM, que defere e atualiza o SIGMA (Anexo I, item 7), e emitir o novo CRAF (Portaria CG nº 189/2021, art. 24, III a V). A arma só muda de mãos depois disso." }
     ],
     formularios: ["anexo-i", "form-02", "ficha-sigma"],
     docs: [REQ("39"), "Anexo I — requerimento de transferência SIGMA → SIGMA, assinado pelas duas partes", "Formulário nº 02 — Transferência de PCE SIGMA-SIGMA", "Ficha para cadastro de arma de fogo no SIGMA", "GRU da taxa de aquisição de PCE e comprovante de pagamento", "Cópia da identidade do comprador e do vendedor", "Cópia do CRAF da arma", "Comprovante de residência do comprador", "Certidão da Corregedoria Geral da SDS/PE (comprador)"],
@@ -2194,7 +2662,7 @@ const GUIAS = [
       P.opcao("39", "“Transferência SIGMA → SINARM”, com os dados da arma e do comprador."),
       P.preencher(),
       { t: "Anexe os documentos", d: "Cópia da sua identidade funcional, da identidade do comprador e do CRAF da arma." },
-      { t: "Envie pela via hierárquica", d: "O processo segue à DLog, que o encaminha ao SFPC/7ª RM; o requerimento despachado volta pela DLog ao 7º GB (Portaria CG nº 189/2021, art. 25)." },
+      { t: "Envie pela via hierárquica", d: "O processo segue à DLog. Aguarde a DLog encaminhá-lo ao SFPC/7ª RM e devolver ao 7º GB o requerimento despachado (Portaria CG nº 189/2021, art. 25)." },
       { t: "Anuência e novo registro", d: "Com a anuência, o SFPC/7ª RM comunica o SINARM e a Polícia Federal emite o novo registro. Só entregue a arma depois disso." },
       { t: "Feche o processo", d: "Recolha o CRAF antigo ao CBMPE para destruição e entregue cópia do novo registro para atualizar o SIGMA (SFPC/7ª RM) e o SIGAP (DLog, com o comprovante de residência do comprador)." }
     ],
@@ -2248,7 +2716,7 @@ const GUIAS = [
     atencao: [
       "O CRAF de arma de integrante do CBMPE tem validade indeterminada (Portaria CG nº 189/2021, art. 31).",
       "Arma particular deve ser portada com a identidade funcional e o CRAF válido (art. 5º).",
-      "Na vistoria, a DLog publica o termo em BGE reservado e o envia ao SFPC/7ª RM para atualizar o cadastro (art. 37, §§ 2º e 3º)."
+      "Depois da vistoria, aguarde a DLog publicar o termo e enviá-lo ao SFPC/7ª RM para atualizar o cadastro (art. 37, §§ 2º e 3º)."
     ],
     base: [PORTARIA_189 + ", arts. 5º, 6º, 31, 33 e 37 e Anexo II", "Lei Federal nº 10.826/2003"],
     relacionados: ["arma-ocorrencia", "arma-aquisicao", "arma-sigma-sinarm"],
@@ -2396,7 +2864,7 @@ const GUIAS = [
     passos: [
       { t: "Registre o boletim de ocorrência", d: "Na Polícia Civil, logo após tomar ciência dos fatos (Portaria CG nº 189/2021, art. 33)." },
       { t: "Comunique o Comandante do 7º GB", d: "Na hora, com o número do BO, os dados da arma (marca, modelo, calibre, nº de série e nº SIGMA) e as circunstâncias." },
-      { t: "Apuração na OME", d: "Furto, roubo, extravio ou inutilização da arma são apurados em procedimento administrativo do 7º GB. Cópias do relatório e da solução, com o nº do BO, vão ao Subcomando-Geral e à DLog, que registra no SIGAP e no SFPC/7ª RM (art. 34)." },
+      { t: "Apuração na OME", d: "Furto, roubo, extravio ou inutilização da arma são apurados em procedimento administrativo do 7º GB. Cópias do relatório e da solução, com o nº do BO, vão ao Subcomando-Geral e à DLog, para registro no SIGAP e no SFPC/7ª RM (art. 34)." },
       { t: "Perdeu o CRAF junto?", d: "Peça a 2ª via do CRAF. Veja o guia do CRAF." },
       { t: "Arma recuperada?", d: "Comunique também a recuperação à Polícia Civil e ao Comandante do 7º GB (art. 33)." }
     ],
@@ -2473,11 +2941,11 @@ const GUIAS = [
 const SITUACOES = [
   { rotulo: "Vou me casar", ids: ["nupcias", "sismepe", "dependentes-sadrh"] },
   { rotulo: "Perdi um familiar", ids: ["luto"] },
-  { rotulo: "Vou ser pai ou mãe", ids: ["maternidade", "paternidade", "sismepe", "dependentes-sadrh"] },
+  { rotulo: "Vou ser pai ou mãe", ids: ["maternidade", "paternidade", "lactante-jornada", "sismepe", "dependentes-sadrh"] },
   { rotulo: "Férias e licenças", ids: ["reprogramacao-ferias", "lesp", "ltip"] },
   { rotulo: "Fui movimentado(a)", ids: ["transito"] },
-  { rotulo: "Problema de saúde", ids: ["ltsp", "ltspf", "horario-pcd"] },
-  { rotulo: "Penso na reserva", ids: ["reserva", "promocao-requerida", "abono", "cts"] },
+  { rotulo: "Problema de saúde", ids: ["ltsp", "ltspf", "horario-pcd", "indenizacao-invalidez"] },
+  { rotulo: "Penso na reserva", ids: ["reserva", "promocao-requerida", "pcnh", "abono", "cts"] },
   { rotulo: "Tempo de outro emprego", ids: ["averbacao", "desaverbacao", "cts"] },
   { rotulo: "Outro cargo público", ids: ["acumulacao"] },
   { rotulo: "Arma particular", ids: ["arma-aquisicao", "arma-gru", "arma-sinarm-sigma", "arma-sigma-sigma", "arma-sigma-sinarm", "craf", "arma-servico", "arma-municao", "arma-ocorrencia"] }
@@ -2491,7 +2959,7 @@ const TRAMITACAO = [
   { quem: "Chefia imediata", titulo: "Faz a triagem", faz: ["Confere se o pedido está completo e coerente.", "Se estiver certo: despacho de encaminhamento à " + CONFIG.seiPessoal + ".", "Se faltar algo: despacho saneador, devolvendo ao requerente com a lista de pendências."], erro: "Encaminhar sem conferir: o processo volta mais adiante e perde semanas." },
   { quem: CONFIG.seiPessoal, titulo: "Confere e encaminha", faz: ["Confere a conformidade com a norma.", "Prepara o ofício de encaminhamento assinado pelo Comandante do 7º GB.", "Minuta a nota para BGE quando o assunto é de competência do 7º GB.", "Remete à diretoria competente: DGP, DLog e outras."], erro: "Processo sem despacho da chefia imediata não é recebido." },
   { quem: "Diretoria competente", titulo: "Analisa", faz: ["Examina os assentamentos funcionais e a legislação aplicável.", "Emite parecer técnico e prepara a minuta da decisão."], erro: "" },
-  { quem: "Autoridade competente", titulo: "Decide", faz: ["Defere ou indefere: Comandante do 7º GB, Diretor de Gestão de Pessoas, Comissão de Promoção, Comandante-Geral, Secretário de Defesa Social, Governador (medalha e promoção de oficial) ou, na reserva, a FUNAPE — conforme o assunto (quadro abaixo)."], erro: "" },
+  { quem: "Autoridade competente", titulo: "Decide", faz: ["Defere ou indefere: Comandante do 7º GB, Diretor de Gestão de Pessoal, Comissão de Promoção, Comandante-Geral, Secretário de Defesa Social, Governador (medalha e promoção de oficial) ou, na reserva, a FUNAPE — conforme o assunto (quadro abaixo)."], erro: "" },
   { quem: "Publicação", titulo: "Publica e arquiva", faz: ["A decisão sai no BGE. Quando a matéria é do 7º GB, a Seção de Pessoal publica direto no módulo BGE da intranet.", "Você toma ciência no SEI. Havendo efeito financeiro, ele é implantado nos sistemas de RH.", "Os autos são arquivados no histórico funcional."], erro: "" }
 ];
 
@@ -2530,6 +2998,7 @@ const GLOSSARIO = [
   ["Agregação", "Situação em que o militar da ativa deixa de ocupar vaga na escala hierárquica do seu quadro, nela permanecendo sem número."],
   ["Averbação", "Registro, nos assentamentos, de tempo de serviço ou de contribuição prestado fora da corporação."],
   ["BGE", "Boletim Geral Eletrônico: publicação oficial dos atos da corporação."],
+  ["BGER", "Boletim Geral Eletrônico Reservado: nele a OME publica, por exemplo, o resultado do laudo pericial da JMS no pedido de horário especial."],
   ["CACEF", "Comissão de Acumulação de Cargos, Empregos e Funções, da SAD: apura acumulação considerada incompatível."],
   ["CPO", "Comissão de Promoção de Oficiais: julga os pedidos de promoção de oficiais, inclusive a promoção requerida."],
   ["CPP", "Comissão de Promoção de Praças: julga os pedidos de promoção de praças, inclusive a promoção requerida."],
@@ -2539,14 +3008,19 @@ const GLOSSARIO = [
   ["CTS", "Certidão de Tempo de Serviço, emitida pela DGP."],
   ["Decênio", "Cada período de 10 anos de efetivo serviço — base da Licença Especial e da medalha de bronze."],
   ["Despacho saneador", "Despacho da chefia que aponta pendências e devolve o processo para correção."],
-  ["DGP", "Diretoria de Gestão de Pessoas do CBMPE."],
+  ["DGP", "Diretoria de Gestão de Pessoal do CBMPE."],
   ["DIP", "Divisão de Inativos e Pensionistas: monta o processo de transferência para a inatividade e o envia à FUNAPE."],
   ["DLog", "Diretoria de Logística do CBMPE: registra as armas particulares, mantém o SIGAP e emite o CRAF. Inclui a Seção de Armamento e Munição (SAMUN)."],
   ["DOE", "Diário Oficial do Estado de Pernambuco."],
+  ["FPSM-PE", "Fundo de Proteção Social dos Militares do Estado de Pernambuco, que substituiu o FUNAFIN (Lei Complementar nº 460/2021). Durante a LTIP não é possível contribuir para ele."],
   ["FUNAPE", "Fundação de Aposentadorias e Pensões dos Servidores do Estado de Pernambuco."],
   ["GMPE", "Guarda Militar do Estado de Pernambuco, para a qual militares da reserva podem ser convocados ou designados."],
   ["GRU", "Guia de Recolhimento da União."],
+  ["Guarnição", "Área em que existem uma ou mais OME; as guarnições são definidas pelo Governador, por proposta do Comandante-Geral (Decreto nº 7.510/1981, art. 4º, VI e § 5º)."],
+  ["Instalação", "Período de afastamento total do serviço, para acomodação, do militar movimentado com mudança de residência, concedido pelo Comandante da OME de destino (Decreto nº 7.510/1981, art. 16)."],
   ["JMS", "Junta Militar de Saúde: realiza as inspeções de saúde da corporação."],
+  ["JTEsp", "Jornada de Trabalho Especial: serviço em regime de plantão, como o apoio operacional aquartelado nas escalas de 12h x 36h e de 24h x 72h."],
+  ["JTR", "Jornada de Trabalho Regular: atividade administrativa, de segunda a sexta-feira, de forma presencial."],
   ["LESP", "Licença Especial."],
   ["LTIP", "Licença para Tratar de Interesse Particular."],
   ["LTSP", "Licença para Tratamento de Saúde Própria."],
@@ -2556,21 +3030,27 @@ const GLOSSARIO = [
   ["OBM", "Organização Bombeiro Militar."],
   ["OME", "Organização Militar Estadual: a unidade em que o militar está lotado."],
   ["PCE", "Produto Controlado pelo Exército."],
-  ["PCNH", "Parcela Complementar de Nível Hierárquico: para o Coronel que ingressou até 31/12/2021, no lugar da promoção requerida."],
+  ["PCNH", "Parcela Complementar de Nível Hierárquico: benefício pecuniário do Coronel da ativa que ingressou na corporação até 31/12/2021, pedido por requerimento quando cumpridas as condições para a inatividade. O Coronel não tem promoção requerida."],
   ["PGE", "Procuradoria Geral do Estado de Pernambuco: emite pareceres jurídicos, como os que tratam da promoção requerida."],
+  ["PJES", "Programa de Jornada Extra de Segurança."],
+  ["Readaptação", "Permanência no serviço ativo, em atividade administrativa e no mesmo posto ou graduação, do militar que a JMS declara com capacidade incompatível com a atividade-fim, decorrente de deficiência (Portaria CG nº 282/2024)."],
   ["Reiteração", "Indicação de quantas vezes o mesmo pedido já foi feito (item 4 do requerimento)."],
   ["SAD", "Secretaria de Administração de Pernambuco."],
   ["SAMUN", "Seção de Armamento e Munição da DLog."],
   ["SDS", "Secretaria de Defesa Social de Pernambuco."],
   ["SEI", "Sistema Eletrônico de Informações: onde os processos são abertos, assinados e tramitados."],
   ["SFPC/7ª RM", "Serviço de Fiscalização de Produtos Controlados da 7ª Região Militar (Exército)."],
+  ["SGP", "Sistema de Gestão de Pessoal da Secretaria de Administração (SAD-PE)."],
   ["SICOVEM", "Sistema de Controle de Venda e Estoque de Munições: registra cada venda de munição pelo CPF do comprador."],
   ["SIGAP", "Sistema de Gerenciamento de Armas Particulares do CBMPE, mantido pela DLog."],
   ["SIGMA", "Sistema de Gerenciamento Militar de Armas, do Exército."],
   ["SIGP", "Sistema Integrado de Gestão Previdenciária: nele a DIP monta o processo de inatividade enviado à FUNAPE."],
   ["SINARM", "Sistema Nacional de Armas, da Polícia Federal."],
+  ["Sindicância não disciplinar", "Procedimento para apuração de direitos, e não de faltas: é o caso do pedido de jornada diferenciada do readaptado e do registro de férias não gozadas."],
   ["SisFPC", "Sistema de Fiscalização de Produtos Controlados do Exército. Os pedidos de cadastro e transferência são lançados no SisFPC.Net."],
   ["SISMEPE", "Sistema de Saúde dos Militares do Estado de Pernambuco."],
+  ["SUNOR", "Suplemento Normativo: publica normas internas do CBMPE, como a SUNOR nº 003/2011, que traz a Portaria CG nº 003/11-DCP/DGP sobre as licenças (LE, LTIP e LTSPF)."],
+  ["TEA", "Transtorno do Espectro Autista."],
   ["TJPE", "Tribunal de Justiça de Pernambuco: emite as certidões cíveis (PJe 1 e PJe 2) e criminais pedidas na promoção requerida."],
   ["Uso restrito", "Classificação de armas cuja compra depende de autorização do Exército: em arma curta, calibres como 9 mm Luger (9×19), .40 S&W, .45 ACP e .357 Magnum; também as armas automáticas e as armas longas de alma raiada semiautomáticas."]
 ];
@@ -2593,7 +3073,10 @@ const DUVIDAS = [
   ["Bombeiro militar tem porte de arma?", "Sim. Pela Portaria CG nº 189/2021, o porte é deferido ao bombeiro militar em razão da função, para armas de porte de uso permitido registradas no SIGMA (art. 4º), cumpridos os requisitos do art. 14, e deve constar na identidade funcional (art. 10). A arma é portada com a identidade funcional e o CRAF válido (art. 5º). O porte pode ser suspenso (arts. 10, § 2º, e 12). Na reserva ou reforma, depende de laudo psicológico a cada 10 anos (art. 13). Como 9 mm Luger, .40 e .45 passaram a uso restrito em 2023, confirme com a DLog como fica o porte dessas armas."],
   ["Pistola 9 mm é de uso permitido?", "Depende do 9 mm. Pela Portaria Conjunta C Ex/DG-PF nº 2/2023, o 9 mm Luger (9×19), o .40 S&W e o .45 ACP são de uso restrito: a compra depende de autorização do SFPC/7ª RM e conta no limite de 2 armas restritas. O 9 mm curto (.380 ACP) e o .38 SPL são de uso permitido."],
   ["E se o dono da arma falecer?", "O administrador da herança ou o curador comunica a Polícia Federal e a DLog e providencia a transferência da arma, que fica guardada em local seguro até a emissão do novo CRAF (Portaria CG nº 189/2021, art. 40)."],
-  ["Quem decide o meu pedido? A quem dirijo o requerimento?", "Depende do assunto: Comandante do 7º GB, Diretor de Gestão de Pessoas, Comissão de Promoção, Comandante-Geral, Secretário de Defesa Social, Governador (medalha e promoção de oficial) ou, na reserva, a FUNAPE. O requerimento é dirigido a essa autoridade — o modelo do SEI vem endereçado à DGP, então troque a linha quando for outra. Cada guia informa, e a página Como tramita traz o quadro completo."]
+  ["Quem decide o meu pedido? A quem dirijo o requerimento?", "Depende do assunto: Comandante do 7º GB, Diretor de Gestão de Pessoal, Comissão de Promoção, Comandante-Geral, Secretário de Defesa Social, Governador (medalha e promoção de oficial) ou, na reserva, a FUNAPE. O requerimento é dirigido a essa autoridade — o modelo do SEI vem endereçado à DGP, então troque a linha quando for outra. Cada guia informa, e a página Como tramita traz o quadro completo."],
+  ["Tenho férias que não gozei. Dá para registrar ou contar em dobro?", "Só constam como não gozadas as férias interrompidas ou não gozadas pelos motivos dos arts. 10 e 11 da Portaria CG nº 312/2025 e registradas em veículo oficial (Diário Oficial, BGE ou Boletim Interno); receber o abono de férias, sem publicação de reprogramação ou de interrupção, presume o gozo (arts. 8º e 9º). Para situações anteriores à Portaria sem registro nos seus assentamentos, requeira à DGP o registro, declarando o motivo que impediu o gozo, para férias a partir de 31/01/1995; antes dessa data, a informação é pedida à PMPE (art. 9º, §§ 2º a 4º). A DGP manda apurar em sindicância e expede a certidão de férias não gozadas (art. 9º, §§ 1º e 5º). As não gozadas até 05/06/1999 pelos motivos do art. 10, registradas e certificadas pela DGP, podem contar em dobro na passagem para a inatividade, só para essa finalidade (art. 9º, § 7º); o modelo do SEI tem a opção 43 (Contar em dobro férias não gozadas)."],
+  ["Sou Coronel. Como funciona a PCNH?", "A Parcela Complementar de Nível Hierárquico é do Coronel da ativa que ingressou no CBMPE até 31/12/2021 sem ter completado, até essa data, o tempo mínimo para a reserva e cumpre o tempo de serviço dos arts. 89-A e 89-D do Estatuto. Cumpridas as condições para a inatividade, ele pede à DGP, por requerimento, a implantação da PCNH na remuneração (Portaria CG nº 254/2023, arts. 4º, § 1º, e 6º, I). Na transferência compulsória (Estatuto, art. 90, § 11), o requerimento tem de ser protocolado até 30 dias antes da data em que se completariam as condições dela (Portaria CG nº 254/2023, art. 4º, § 3º); quem está em cargo comissionado (CAA), cargo em comissão (DAS até DAS-5) ou função gratificada (FDA a FDA-3) requer na data da efetiva exoneração (cartilha da DGP). A Licença Especial tem de ser concedida antes do requerimento (cartilha da DGP). Depois de dois meses seguidos recebendo a PCNH, o Coronel é desligado do serviço ativo, e não cabe desistência depois da implantação (art. 5º, §§ 2º e 3º). O Tenente-Coronel promovido a Coronel pela promoção requerida não tem direito à PCNH (art. 5º, § 1º). O passo a passo e os documentos estão no guia da PCNH, em Carreira."],
+  ["Fui julgado(a) incapaz definitivamente pela JMS. Preciso pedir a promoção por invalidez?", "Não há requerimento: o processo começa quando a corporação recebe o laudo da JMS, registrado em ata, que julga o militar da ativa incapaz definitivamente, sem possibilidade de readaptação (Portaria CG nº 253/2023, art. 3º, I; cartilha da DGP). A OME envia o laudo à Comissão de Promoção (CPO ou CPP) em 2 dias úteis, sem esperar os demais documentos (art. 6º, III); a Comissão analisa apenas o laudo (art. 5º). A sua parte é providenciar com a OME, em até 10 dias úteis da recepção da ata, os documentos do processo de reforma: o termo de transferência para inatividade (Anexo I) e a declaração de endereço à FUNAPE, com o CEP dos Correios (Anexo II), cada um em uma via assinada digitalmente e outra, em PDF, assinada a próprio punho, e a declaração atualizada de dependentes previdenciários (Anexo III); se você recebe abono de permanência, a publicação também vai ao processo (arts. 4º e 6º, II). Os modelos dos Anexos I a III estão na própria Portaria CG nº 253/2023 (no SEI, doc. nº 40399656). Cada documento vai em PDF separado e certificado no SEI; fotografia de documento não é aceita (art. 4º, §§ 1º e 2º). A promoção independe de vaga, interstício ou curso; depois dela, o militar passa a excedente, adido à OME (praças, oficiais subalternos e intermediários) ou à DGP (oficiais superiores), até a publicação da portaria de desligamento do serviço ativo (art. 7º, II), e não pode ser promovido por outro critério (art. 3º, IV e V; LC nº 470/2021, art. 11). Os efeitos da reforma contam da data de publicação do ato de reforma, sem efeito retroativo (art. 3º, III)."]
 ];
 
 </script>
@@ -3580,7 +4063,7 @@ const SEI_AJUDA = (function () {
   /* destinatário do requerimento conforme o assunto (DEST, em data.js) */
   function destinoDe(g, p) {
     const d = typeof g.destinatario === "function" ? g.destinatario(p || {}) : g.destinatario;
-    return d || { linha: CONFIG.destinatario, nome: "Diretor de Gestão de Pessoas" };
+    return d || { linha: CONFIG.destinatario, nome: "Diretor de Gestão de Pessoal" };
   }
   function rotuloDestino(g) {
     if (g.destinatarioRotulo) return g.destinatarioRotulo;
@@ -4157,7 +4640,7 @@ const SEI_AJUDA = (function () {
         campo({ id: "ome", rotulo: "OME", tipo: "texto", ex: "Ex.: 2ª SB/7º GB" }, d.ome || CONFIG.unidadeSigla, "d") +
         campo({ id: "matricula", rotulo: "Matrícula", tipo: "texto" }, d.matricula, "d") +
         campo({ id: "fone", rotulo: "Telefone", tipo: "texto", ex: "(81) 90000-0000" }, d.fone, "d") +
-        campo({ id: "endereco", rotulo: "Endereço", tipo: "texto", largo: true, ex: "Rua, nº, bairro, cidade/PE, CEP" }, d.endereco, "d") +
+        campo({ id: "endereco", rotulo: m.rotuloEndereco || "Endereço", tipo: "texto", largo: true, ex: "Rua, nº, bairro, cidade/PE, CEP" }, d.endereco, "d") +
       "</div></fieldset>" +
       '<fieldset class="grupo-campos"><legend>' + ic("documento") + "Dados do pedido — Especificar</legend><div class=\"campos\">" +
         m.campos.map(function (c) { return campo(c, "", "p"); }).join("") +
@@ -4334,7 +4817,7 @@ const SEI_AJUDA = (function () {
       ome: { valor: (d.ome || "").trim(), rotulo: "OME" },
       matricula: { valor: (d.matricula || "").trim(), rotulo: "matrícula" },
       fone: { valor: (d.fone || "").trim(), rotulo: "telefone" },
-      endereco: { valor: (d.endereco || "").trim().replace(/[.;,\s]+$/, ""), rotulo: "endereço" },
+      endereco: { valor: (d.endereco || "").trim().replace(/[.;,\s]+$/, ""), rotulo: m.rotuloEndereco || "endereço" },
       dest: { valor: (x.dest || "").trim(), rotulo: "destinatário" },
       vez: { valor: x.vez || "1ª", rotulo: "" },
       anterior: { valor: (x.anterior || "").trim(), rotulo: "processo anterior" },
